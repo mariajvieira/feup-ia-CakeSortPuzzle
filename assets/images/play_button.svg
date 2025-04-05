@@ -1,0 +1,14 @@
+<svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="buttonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff71e7" />
+      <stop offset="100%" stop-color="#7e71ff" />
+    </linearGradient>
+  </defs>
+  <circle cx="25" cy="25" r="23" fill="url(#buttonGradient)" stroke="#ffffff" stroke-width="2">
+    <animate attributeName="r" values="22;23;22" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <path d="M20 15 L20 35 L35 25 Z" fill="#ffffff">
+    <animate attributeName="fill-opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite" />
+  </path>
+</svg>

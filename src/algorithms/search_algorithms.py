@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Módulo de algoritmos de busca - Implementa os algoritmos BFS, DFS, IDS e UCS
+para resolver o puzzle de ordenação de bolos.
+"""
+
+import heapq
+from collections import deque
+
+
+class Node:
+    """Classe que representa um nó na árvore de busca.
+    
+    Attributes:
+        state (GameState): Estado do jogo associado a este nó.
+        parent (Node): Nó pai na árvore de busca.
+        action (tuple): Ação que levou a este nó (x, y, plate_index).
+        cost (int): Custo acumulado para chegar a este nó.
+        depth (int): Profundidade deste nó na árvore de busca.
+    """
+    
+    def __init__(self, state, parent=None, action=None, cost=0, depth=0):
+        """Inicializa um novo nó.
+        
+        Args:
+            state (GameState): Estado do jogo associado a este nó.
+            parent (Node, optional): Nó pai na árvore de busca.
+            action (tuple, optional): Ação que levou a este nó (x, y, plate_index).
+            cost (int, optional): Custo acumulado para chegar a este nó.
+            depth (int, optional): Profundidade deste nó na árvore de busca.
+        """
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.cost = cost
+        self.depth = depth
+    
+    def __lt__(self, other):
+        """Comparação para uso em filas de prioridade.
+        
+        Args:
+            other (Node): Outro nó para comparação.
+            
+        Returns:
+            bool: True se este nó tem menor custo que o outro.
+        """
+        return self.cost < other.cost
+
+
+def get_successors(node):
+    """Retorna os nós sucessores de um nó dado.
+    
+    Args:
+        node (Node): Nó atual.
+        
+    Returns:
+        list: Lista de nós sucessores.
+    """
+    successors = []
+    state = node.state
+    
+    # Para cada posição no tabuleiro
+    for x in range(state.board.rows):
+        for y in range(state.board.cols):
+            # Se a posição estiver vazia
+            if state.board.is_empty(x, y):
+                # Para cada prato disponível
+                for plate_index in range(len(state.avl_plates.plates)):
+                    # Cria um novo estado
+                    new_state = state.clone()
+                    
+                    # Tenta colocar o prato no tabuleiro
+                    if new_state.place_plate(x, y, plate_index):
+                        # Cria um novo nó
+                        action = (x, y, plate_index)
+                        cost = node.cost + 1  # Cada movimento tem custo 1
+                        depth = node.depth + 1
+                        successor = Node(new_state, node, action, cost, depth)
+                        successors.append(successor)
+    
+    return successors
+
+
+def is_goal(node):
+    """Verifica se um nó representa um estado objetivo.
+    
+    Args:
+        node (Node): Nó a ser verificado.
+        
+    Returns:
+        bool: True se o nó representa um estado objetivo, False caso contrário.
+    """
+    return node.state.win
+
+
+def get_solution_path(node):
+    """Retorna o caminho da solução a partir do nó objetivo.
+    
+    Args:
+        node (Node): Nó objetivo.
+        
+    Returns:
+        list: Lista de ações que levam do estado inicial ao objetivo.
+    """
+    path = []
+    current = node
+    
+    while current.parent is not None:
+        path.append(current.action)
+        current = current.parent
+    
+    # Inverte o caminho para obter a ordem correta (do início ao fim)
+    path.reverse()
+    
+    return path
+
+
+def bfs(initial_state):
+    """Implementa o algoritmo de busca em largura (BFS).
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa a fila e o conjunto de estados visitados
+    queue = deque([initial_node])
+    visited = set()
+    
+    while queue:
+        # Remove o primeiro nó da fila
+        node = queue.popleft()
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Gera os sucessores
+        for successor in get_successors(node):
+            # Verifica se o sucessor é um objetivo
+            if is_goal(successor):
+                return True, get_solution_path(successor)
+            
+            # Adiciona o sucessor à fila
+            queue.append(successor)
+    
+    # Não encontrou solução
+    return False, None
+
+
+def dfs(initial_state, depth_limit=None):
+    """Implementa o algoritmo de busca em profundidade (DFS).
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        depth_limit (int, optional): Limite de profundidade para a busca.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa a pilha e o conjunto de estados visitados
+    stack = [initial_node]
+    visited = set()
+    
+    while stack:
+        # Remove o último nó da pilha
+        node = stack.pop()
+        
+        # Verifica se atingiu o limite de profundidade
+        if depth_limit is not None and node.depth >= depth_limit:
+            continue
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Gera os sucessores (em ordem reversa para manter a ordem de exploração)
+        successors = get_successors(node)
+        successors.reverse()
+        
+        for successor in successors:
+            # Verifica se o sucessor é um objetivo
+            if is_goal(successor):
+                return True, get_solution_path(successor)
+            
+            # Adiciona o sucessor à pilha
+            stack.append(successor)
+    
+    # Não encontrou solução
+    return False, None
+
+
+def ids(initial_state, max_depth=50):
+    """Implementa o algoritmo de busca em profundidade iterativa (IDS).
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        max_depth (int, optional): Profundidade máxima para a busca.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    for depth in range(max_depth + 1):
+        success, path = dfs(initial_state, depth)
+        if success:
+            return True, path
+    
+    # Não encontrou solução dentro do limite de profundidade
+    return False, None
+
+
+def ucs(initial_state):
+    """Implementa o algoritmo de busca de custo uniforme (UCS).
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa a fila de prioridade e o conjunto de estados visitados
+    priority_queue = [initial_node]  # heapq usa o operador < para comparação
+    visited = set()
+    
+    while priority_queue:
+        # Remove o nó de menor custo da fila
+        node = heapq.heappop(priority_queue)
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Gera os sucessores
+        for successor in get_successors(node):
+            # Verifica se o sucessor é um objetivo
+            if is_goal(successor):
+                return True, get_solution_path(successor)
+            
+            # Adiciona o sucessor à fila de prioridade
+            heapq.heappush(priority_queue, successor)
+    
+    # Não encontrou solução
+    return False, None
+
+
+def get_algorithm(algorithm_name):
+    """Retorna a função de algoritmo correspondente ao nome.
+    
+    Args:
+        algorithm_name (str): Nome do algoritmo ('bfs', 'dfs', 'ids', 'ucs').
+        
+    Returns:
+        function: Função do algoritmo correspondente ou None se não encontrado.
+    """
+    algorithms = {
+        'bfs': bfs,
+        'dfs': dfs,
+        'ids': ids,
+        'ucs': ucs
+    }
+    
+    return algorithms.get(algorithm_name.lower())
