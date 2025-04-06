@@ -66,13 +66,14 @@ def get_successors(node):
         for y in range(state.board.cols):
             # Se a posição estiver vazia
             if state.board.is_empty(x, y):
-                # Para cada prato disponível
-                for plate_index in range(len(state.avl_plates.plates)):
+                # Para cada prato disponível visível
+                for plate_index in range(len(state.avl_plates.visible_plates)):
                     # Cria um novo estado
                     new_state = state.clone()
                     
                     # Tenta colocar o prato no tabuleiro
-                    if new_state.place_plate(x, y, plate_index):
+                    success, _ = new_state.place_plate(x, y, plate_index)
+                    if success:
                         # Cria um novo nó
                         action = (x, y, plate_index)
                         cost = node.cost + 1  # Cada movimento tem custo 1
@@ -92,7 +93,8 @@ def is_goal(node):
     Returns:
         bool: True se o nó representa um estado objetivo, False caso contrário.
     """
-    return node.state.win
+    # Vitória agora é quando todos os pratos foram colocados sem preencher o tabuleiro
+    return node.state.win or (node.state.avl_plates.is_exhausted() and not node.state.board.is_full())
 
 
 def get_solution_path(node):
@@ -151,13 +153,13 @@ def bfs(initial_state):
         # Marca o estado como visitado
         visited.add(state_repr)
         
+        # CORREÇÃO: Verificar se o nó atual é um objetivo
+        if is_goal(node):
+            return True, get_solution_path(node)
+        
         # Gera os sucessores
         for successor in get_successors(node):
-            # Verifica se o sucessor é um objetivo
-            if is_goal(successor):
-                return True, get_solution_path(successor)
-            
-            # Adiciona o sucessor à fila
+            # Não precisamos verificar o objetivo aqui, pois verificamos cada nó quando é retirado da fila
             queue.append(successor)
     
     # Não encontrou solução
@@ -181,6 +183,11 @@ def dfs(initial_state, depth_limit=None):
     if is_goal(initial_node):
         return True, []
     
+    # Define um limite de profundidade padrão se não for especificado
+    if depth_limit is None:
+        # Usar o número total de pratos como base para o limite (cada prato pode ser uma ação)
+        depth_limit = initial_state.avl_plates.total_plate_limit * 2
+    
     # Inicializa a pilha e o conjunto de estados visitados
     stack = [initial_node]
     visited = set()
@@ -190,7 +197,7 @@ def dfs(initial_state, depth_limit=None):
         node = stack.pop()
         
         # Verifica se atingiu o limite de profundidade
-        if depth_limit is not None and node.depth >= depth_limit:
+        if node.depth >= depth_limit:
             continue
         
         # Obtém uma representação hashable do estado
@@ -203,16 +210,19 @@ def dfs(initial_state, depth_limit=None):
         # Marca o estado como visitado
         visited.add(state_repr)
         
-        # Gera os sucessores (em ordem reversa para manter a ordem de exploração)
-        successors = get_successors(node)
-        successors.reverse()
+        # Verifica se este é um estado objetivo
+        if is_goal(node):
+            return True, get_solution_path(node)
         
+        # Gera os sucessores
+        successors = get_successors(node)
+        
+        # Embaralha os sucessores para evitar tendência para uma direção específica
+        import random
+        random.shuffle(successors)
+        
+        # Adiciona todos os sucessores à pilha
         for successor in successors:
-            # Verifica se o sucessor é um objetivo
-            if is_goal(successor):
-                return True, get_solution_path(successor)
-            
-            # Adiciona o sucessor à pilha
             stack.append(successor)
     
     # Não encontrou solução
@@ -296,7 +306,7 @@ def get_algorithm(algorithm_name):
     """
     algorithms = {
         'bfs': bfs,
-        'dfs': dfs,
+        'dfs': lambda state: dfs(state, depth_limit=state.avl_plates.total_plate_limit * 2),
         'ids': ids,
         'ucs': ucs
     }

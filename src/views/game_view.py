@@ -94,12 +94,12 @@ class GameView:
         # Calcula o tamanho e posição dos pratos disponíveis
         plate_size = self.cell_size * 0.8
         plate_spacing = plate_size * 1.2
-        plates_width = plate_spacing * len(self.game_state.avl_plates.plates)
+        plates_width = plate_spacing * len(self.game_state.avl_plates.visible_plates)
         plates_x = (screen_width - plates_width) // 2
         plates_y = board_y + board_height + 50
         
         self.plate_rects = []
-        for i in range(len(self.game_state.avl_plates.plates)):
+        for i in range(len(self.game_state.avl_plates.visible_plates)):
             x = plates_x + i * plate_spacing
             y = plates_y
             self.plate_rects.append(pygame.Rect(x, y, plate_size, plate_size))
@@ -269,8 +269,8 @@ class GameView:
             selected_plate (int): Índice do prato selecionado.
         """
         for i, rect in enumerate(self.plate_rects):
-            if i < len(self.game_state.avl_plates.plates):
-                plate = self.game_state.avl_plates.plates[i]
+            if i < len(self.game_state.avl_plates.visible_plates):
+                plate = self.game_state.avl_plates.visible_plates[i]
                 
                 # Destaca o prato selecionado
                 if i == selected_plate:
@@ -297,9 +297,9 @@ class GameView:
         level_rect = level_text.get_rect(left=10, top=10)
         self.screen.blit(level_text, level_rect)
         
-        # Renderiza a pontuação
+        # Renderiza a pontuação (agora sem alvo)
         score_text = self.fonts['medium'].render(
-            f"Pontuação: {self.game_state.score}/{self.game_state.target_score}",
+            f"Pontuação: {self.game_state.score}",
             True, self.colors['text'])
         score_rect = score_text.get_rect(left=10, top=level_rect.bottom + 5)
         self.screen.blit(score_text, score_rect)
@@ -309,6 +309,12 @@ class GameView:
         moves_rect = moves_text.get_rect(left=10, top=score_rect.bottom + 5)
         self.screen.blit(moves_text, moves_rect)
         
+        # Renderiza o número de pratos restantes
+        plates_remaining = self.game_state.avl_plates.get_remaining_plates()
+        plates_text = self.fonts['medium'].render(f"Pratos Restantes: {plates_remaining}/18", True, self.colors['text'])
+        plates_rect = plates_text.get_rect(left=10, top=moves_rect.bottom + 5)
+        self.screen.blit(plates_text, plates_rect)
+        
         # Renderiza as instruções
         instructions = [
             "Instruções:",
@@ -316,10 +322,11 @@ class GameView:
             "- Clique em uma posição vazia no tabuleiro para colocá-lo",
             "- Pressione ESC para voltar ao menu",
             "- Pressione S para resolver automaticamente",
-            "- Pressione A para ativar/desativar solução automática"
+            "- Pressione A para ativar/desativar solução automática",
+            "- Complete todos os 18 pratos sem preencher o tabuleiro para vencer"
         ]
         
-        y = self.screen.get_height() - 120
+        y = self.screen.get_height() - 140
         for instruction in instructions:
             text = self.fonts['small'].render(instruction, True, self.colors['text'])
             rect = text.get_rect(left=10, top=y)
@@ -371,7 +378,7 @@ class GameView:
             int: Índice do prato ou -1 se não houver prato na posição.
         """
         for i, rect in enumerate(self.plate_rects):
-            if i < len(self.game_state.avl_plates.plates) and rect.collidepoint(pos):
+            if i < len(self.game_state.avl_plates.visible_plates) and rect.collidepoint(pos):
                 return i
         return -1
     

@@ -61,6 +61,13 @@ class GameController:
         self.auto_solve = False
         self.auto_solve_step = 0
         self.game_mode = game_mode
+        
+        # Se estiver no modo AI, iniciar a solução automática
+        if game_mode == 'ai':
+            # Adicionar pequeno atraso antes de resolver para permitir que o jogo seja renderizado
+            self.auto_solve_timer = 60  # Aproximadamente 1 segundo em 60 FPS
+            # Definir um flag para indicar que devemos resolver após o atraso
+            self.start_solving = True
     
     def end_game(self):
         """Encerra o jogo atual e retorna ao menu."""
@@ -104,6 +111,15 @@ class GameController:
         if self.game_state.game_over:
             return
         
+        # No modo AI, não permitir interação manual com o tabuleiro
+        if self.game_mode == 'ai':
+            # Opcionalmente, iniciar a solução automática se ainda não estiver ativa
+            if not self.auto_solve and not self.solution_path:
+                self.solve_game()
+                self.toggle_auto_solve()
+            return
+        
+        # Código existente para modo humano
         # Verifica se clicou em um prato disponível
         plate_index = self.game_view.get_plate_at_pos(pos)
         if plate_index != -1:
@@ -137,6 +153,15 @@ class GameController:
     
     def update(self):
         """Atualiza o estado do jogo."""
+        # Se estiver no modo AI e precisar iniciar a solução após o atraso
+        if self.game_mode == 'ai' and hasattr(self, 'start_solving') and self.start_solving:
+            self.auto_solve_timer -= 1
+            if self.auto_solve_timer <= 0:
+                self.solve_game()
+                self.toggle_auto_solve()
+                self.start_solving = False
+                
+        # Código existente para auto-solving    
         if self.auto_solve and self.solution_path and not self.game_state.game_over:
             # Atualiza o temporizador para a solução automática
             self.auto_solve_timer += 1
@@ -179,6 +204,12 @@ class GameController:
             # Obtém a ação do caminho da solução
             action = self.solution_path[self.auto_solve_step]
             x, y, plate_index = action
+            
+            # No novo sistema, plate_index deve estar dentro dos pratos visíveis disponíveis
+            # Se não houver pratos visíveis suficientes, espere até o próximo passo
+            if plate_index >= len(self.game_state.avl_plates.visible_plates):
+                # Aguarde até que haja pratos suficientes
+                return
             
             # Executa a ação
             self.selected_plate = plate_index

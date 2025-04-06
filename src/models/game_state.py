@@ -42,8 +42,8 @@ class GameState:
         self.board = Board(board_size[0], board_size[1])
         self.avl_plates = AvailablePlates(level)
         
-        # Define a pontuação alvo com base no nível
-        self.target_score = self._get_target_score(level)
+        # Não há pontuação alvo, apenas pontuação acumulada pelos bolos completados
+        self.target_score = None  # Removemos o conceito de pontuação alvo
     
     def _get_board_size(self, level):
         """Retorna o tamanho do tabuleiro com base no nível.
@@ -65,27 +65,6 @@ class GameState:
         
         # Retorna o tamanho correspondente ao nível ou o maior tamanho disponível
         return sizes.get(level, sizes[max(sizes.keys())])
-    
-    def _get_target_score(self, level):
-        """Retorna a pontuação alvo com base no nível.
-        
-        Args:
-            level (int): Nível do jogo.
-            
-        Returns:
-            int: Pontuação alvo para o nível.
-        """
-        # Pontuações alvo para diferentes níveis
-        targets = {
-            1: 3,   # Nível 1: 3 bolos
-            2: 5,   # Nível 2: 5 bolos
-            3: 7,   # Nível 3: 7 bolos
-            4: 10,  # Nível 4: 10 bolos
-            5: 15   # Nível 5: 15 bolos
-        }
-        
-        # Retorna a pontuação alvo correspondente ao nível ou a maior pontuação disponível
-        return targets.get(level, targets[max(targets.keys())])
     
     def place_plate(self, x, y, plate_index):
         """Coloca um prato no tabuleiro na posição especificada.
@@ -133,18 +112,19 @@ class GameState:
                 self.score += completed_cakes
                 animation_info['completed_cakes'] = completed_cakes
                 animation_info['cake_positions'] = [(x, y)]  # Posição do último prato colocado
-                
-                # Verifica se o jogador atingiu a pontuação alvo
-                if self.score >= self.target_score:
-                    self.win = True
-                    self.game_over = True
             
-            # Verifica se o tabuleiro está cheio (condição de derrota)
-            if self.board.is_full() and not self.win:
+            # MUDANÇA 1: Verifica condição de vitória - se todos os pratos foram utilizados
+            if self.avl_plates.is_exhausted():
+                self.win = True
+                self.game_over = True
+            
+            # MUDANÇA 2: Verifica se o tabuleiro está cheio (condição de derrota)
+            # mas ainda tem pratos disponíveis para colocar
+            if self.board.is_full() and not self.avl_plates.is_exhausted():
                 self.game_over = True
                 self.win = False
             
-            # Verifica se ainda há movimentos válidos
+            # MUDANÇA 3: Verifica se ainda há movimentos válidos
             if not self.avl_plates.has_plates() and not self.win:
                 self.game_over = True
             
