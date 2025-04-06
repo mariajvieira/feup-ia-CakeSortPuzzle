@@ -32,7 +32,7 @@ class AvailablePlates:
         
         # Define o limite total de pratos com base no nível
         if level == 1:
-            self.total_plate_limit = 4  # Nível 1: apenas 4 pratos (atualizado de 6)
+            self.total_plate_limit = 5  # Nível 1: 12 pratos (atualizado de 4)
         else:
             self.total_plate_limit = 18  # Outros níveis: 18 pratos
             

@@ -56,7 +56,7 @@ class GameState:
         """
         # Tamanhos de tabuleiro para diferentes níveis (reduzidos)
         sizes = {
-            1: (3, 3),  # Nível 1: 3x3 (era 4x4)
+            1: (2, 2),  # Nível 1: 3x3 (era 4x4)
             2: (3, 4),  # Nível 2: 3x4 (era 4x5)
             3: (4, 4),  # Nível 3: 4x4 (era 5x5)
             4: (4, 5),  # Nível 4: 4x5 (era 5x6)

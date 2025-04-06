@@ -229,22 +229,69 @@ def dfs(initial_state, depth_limit=None):
     return False, None
 
 
-def ids(initial_state, max_depth=50):
-    """Implementa o algoritmo de busca em profundidade iterativa (IDS).
+def ids(initial_state, max_depth=None):
+    """Implementa o algoritmo de busca em profundidade iterativa (IDS)."""
+    import time
+    start_time = time.time()
     
-    Args:
-        initial_state (GameState): Estado inicial do jogo.
-        max_depth (int, optional): Profundidade máxima para a busca.
+    # Define profundidade máxima baseada no número de pratos
+    if max_depth is None:
+        max_depth = initial_state.avl_plates.total_plate_limit
+    
+    # Verifica estado inicial
+    initial_node = Node(initial_state)
+    if is_goal(initial_node):
+        return True, []
+    
+    # Armazena a melhor solução parcial encontrada
+    best_solution = None
+    
+    # Para cada profundidade, do mais raso ao mais profundo
+    for depth_limit in range(1, max_depth + 1):
+        print(f"IDS: buscando na profundidade {depth_limit}")
+        stack = [initial_node]
+        visited = set()
         
-    Returns:
-        tuple: (bool, list) - Sucesso e caminho da solução ou None.
-    """
-    for depth in range(max_depth + 1):
-        success, path = dfs(initial_state, depth)
-        if success:
-            return True, path
+        while stack:
+            # Limite de tempo (15 segundos em vez de 8)
+            if time.time() - start_time > 600:
+                # Se temos alguma solução parcial, retorna-a
+                if best_solution:
+                    print(f"IDS: tempo esgotado, retornando melhor solução parcial com {len(best_solution)} passos")
+                    return True, best_solution
+                return False, None
+                
+            node = stack.pop()
+            
+            # Verificação de objetivo logo no início
+            if is_goal(node):
+                solution = get_solution_path(node)
+                print(f"IDS: encontrou solução com {len(solution)} passos na profundidade {depth_limit}")
+                return True, solution
+            
+            state_repr = str(node.state.get_state_representation())
+            if state_repr in visited or node.depth >= depth_limit:
+                continue
+                
+            visited.add(state_repr)
+            
+            # Armazena melhor solução parcial se todos os pratos foram usados
+            if node.state.avl_plates.is_exhausted():
+                solution = get_solution_path(node)
+                if best_solution is None or len(solution) < len(best_solution):
+                    best_solution = solution
+            
+            # Gera sucessores apenas se não atingiu o limite de profundidade
+            if node.depth < depth_limit:
+                successors = get_successors(node)
+                for successor in successors:
+                    stack.append(successor)
     
-    # Não encontrou solução dentro do limite de profundidade
+    # Se temos alguma solução parcial, retorna-a
+    if best_solution:
+        print(f"IDS: retornando melhor solução parcial com {len(best_solution)} passos")
+        return True, best_solution
+    
     return False, None
 
 
@@ -287,7 +334,7 @@ def ucs(initial_state):
             # Verifica se o sucessor é um objetivo
             if is_goal(successor):
                 return True, get_solution_path(successor)
-            
+                        
             # Adiciona o sucessor à fila de prioridade
             heapq.heappush(priority_queue, successor)
     
@@ -300,7 +347,7 @@ def get_algorithm(algorithm_name):
     algorithms = {
         'bfs': bfs,
         'dfs': lambda state: dfs(state, depth_limit=state.avl_plates.total_plate_limit * 3),
-        'ids': ids,
+        'ids': lambda state: ids(state, max_depth=state.avl_plates.total_plate_limit * 2),
         'ucs': ucs
     }
     

@@ -188,9 +188,11 @@ class GameController:
                 end_time = time.time()
                 self.solution_time = end_time - start_time
                 
-                if success:
+                print(f"Algoritmo {self.algorithm} - Sucesso: {success}, Tamanho da solução: {len(path) if path else 0}")
+                
+                if success and path:
                     self.solution_path = path
-                    # Registra o resultado no arquivo de log (opcional)
+                    # Registra o resultado no arquivo de log
                     self._log_algorithm_result(success, len(path))
                     return True
         return False
@@ -248,26 +250,38 @@ class GameController:
     
     def _execute_solution_step(self):
         """Executa um passo da solução automática."""
-        if self.auto_solve_step < len(self.solution_path):
-            # Obtém a ação do caminho da solução
-            action = self.solution_path[self.auto_solve_step]
-            x, y, plate_index = action
+        if not self.solution_path or self.auto_solve_step >= len(self.solution_path):
+            # Não há mais passos na solução ou solução vazia
+            self.auto_solve = False
+            return
             
-            # No novo sistema, plate_index deve estar dentro dos pratos visíveis disponíveis
-            # Se não houver pratos visíveis suficientes, espere até o próximo passo
-            if plate_index >= len(self.game_state.avl_plates.visible_plates):
-                # Aguarde até que haja pratos suficientes
-                return
+        # Obtém a ação do caminho da solução
+        action = self.solution_path[self.auto_solve_step]
+        x, y, plate_index = action
+        
+        # Verifica se o índice do prato está dentro dos limites
+        if plate_index >= len(self.game_state.avl_plates.visible_plates):
+            # Debug para entender melhor o problema
+            print(f"Esperando prato {plate_index}, mas só temos {len(self.game_state.avl_plates.visible_plates)} disponíveis")
+            # Tentaremos novamente no próximo ciclo
+            return
+        
+        # Executa a ação
+        self.selected_plate = plate_index
+        success, animation_info = self.game_state.place_plate(x, y, plate_index)
+        
+        if success:
+            print(f"Passo {self.auto_solve_step+1}/{len(self.solution_path)}: Prato {plate_index} colocado em ({x},{y})")
+            # Resto do código para animações...
             
-            # Executa a ação
-            self.selected_plate = plate_index
-            self.game_state.place_plate(x, y, plate_index)
-            self.selected_plate = -1
-            
-            # Avança para o próximo passo
+            # Avança para o próximo passo SOMENTE se a ação foi bem-sucedida
             self.auto_solve_step += 1
         else:
-            # Chegou ao fim da solução
+            print(f"Falha ao colocar prato {plate_index} em ({x},{y})")
+            self.selected_plate = -1
+        
+        # Se chegou ao fim da solução, desativa o auto-solve
+        if self.auto_solve_step >= len(self.solution_path):
             self.auto_solve = False
     
     def set_algorithm(self, algorithm):
