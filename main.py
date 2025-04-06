@@ -21,9 +21,10 @@ def main():
     pygame.display.set_caption("Cake Sorting Puzzle")
     
     # Configurações da tela
-    screen_width = 800
-    screen_height = 600
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    info = pygame.display.Info()
+    screen_width = info.current_w
+    screen_height = info.current_h
+    screen = pygame.display.set_mode((screen_width, screen_height),pygame.FULLSCREEN)
     
     # Inicializa o controlador do jogo
     game_controller = GameController(screen)

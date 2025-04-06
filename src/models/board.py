@@ -158,14 +158,70 @@ class Board:
         Returns:
             tuple: (bool, int) - True se houve movimentação e o número de fatias movidas.
         """
-        # Verifica se há espaço no prato de destino
-        empty_slots = target_plate.count(None)
-        if empty_slots == 0:
-            return False, 0
-        
         # Conta quantas fatias do tipo específico existem no prato de origem
         slices_to_move = source_plate.count(slice_type)
         if slices_to_move == 0:
+            return False, 0
+        
+        # Verifica se há espaço no prato de destino
+        empty_slots = target_plate.count(None)
+        
+        # Se não houver espaços vazios, verifica se podemos fazer trocas
+        if empty_slots == 0:
+            # Verifica se o prato de destino já tem fatias do mesmo tipo
+            target_slices_of_type = target_plate.count(slice_type)
+            if target_slices_of_type > 0:
+                # Conta outros tipos de fatias no prato de destino
+                other_types = {}
+                for s in target_plate:
+                    if s is not None and s != slice_type:
+                        other_types[s] = other_types.get(s, 0) + 1
+                
+                # Verifica se há espaço no prato de origem para receber outras fatias
+                source_empty_slots = source_plate.count(None)
+                
+                # Se houver pelo menos um tipo diferente no prato de destino e espaço no prato de origem
+                if other_types and source_empty_slots >= min(other_types.values()):
+                    # Escolhe o tipo com menor quantidade para mover para o prato de origem
+                    other_type = min(other_types, key=other_types.get)
+                    
+                    # Move as fatias do outro tipo para o prato de origem
+                    moved = False
+                    slices_moved = 0
+                    
+                    # Primeiro, move as fatias do outro tipo para o prato de origem
+                    for i in range(len(target_plate)):
+                        if target_plate[i] == other_type and source_empty_slots > 0:
+                            target_plate[i] = None
+                            
+                            # Adiciona a fatia ao prato de origem
+                            for j in range(len(source_plate)):
+                                if source_plate[j] is None:
+                                    source_plate[j] = other_type
+                                    break
+                            
+                            source_empty_slots -= 1
+                            moved = True
+                    
+                    # Agora, move as fatias do tipo específico para o prato de destino
+                    empty_slots = target_plate.count(None)
+                    slices_to_move = min(slices_to_move, empty_slots)
+                    
+                    for i in range(len(source_plate)):
+                        if source_plate[i] == slice_type and slices_to_move > 0:
+                            source_plate[i] = None
+                            
+                            for j in range(len(target_plate)):
+                                if target_plate[j] is None:
+                                    target_plate[j] = slice_type
+                                    break
+                            
+                            slices_to_move -= 1
+                            slices_moved += 1
+                            moved = True
+                    
+                    return moved, slices_moved
+            
             return False, 0
         
         # Limita o número de fatias a mover ao espaço disponível

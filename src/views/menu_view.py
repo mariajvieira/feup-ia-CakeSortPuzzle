@@ -134,42 +134,79 @@ class MenuView:
     
     def _init_buttons(self):
         """Inicializa os botões do menu com design moderno."""
-        button_width = 220
-        button_height = 50
-        button_spacing = 25
+        # Proporções baseadas no tamanho da tela para responsividade
+        button_width = int(self.screen_width * 0.18)
+        button_height = int(self.screen_height * 0.06)
+        button_spacing = int(self.screen_height * 0.08)
         
-        # Calcula a posição central
+        # Divisão clara da tela em seções
+        header_height = int(self.screen_height * 0.2)  # Seção superior para título
+        footer_height = int(self.screen_height * 0.25)  # Seção inferior para instruções
+        content_height = self.screen_height - header_height - footer_height  # Área central para interação
+        
+        # Posição inicial dos elementos na área de conteúdo
         center_x = self.screen_width // 2
-        start_y = self.screen_height // 2 - 50
+        content_start_y = header_height + int(content_height * 0.1)  # 10% de margem superior
         
-        # Botões de nível - Layout horizontal mais compacto e moderno
+        # Botões de nível com bom espaçamento
         level_buttons = {}
-        for i in range(1, 6):  # Níveis 1 a 5
-            x = center_x - 250 + (i - 1) * 100
-            y = start_y
-            level_buttons[i] = pygame.Rect(x, y, 80, button_height)
+        level_width = int(self.screen_width * 0.06)
+        level_spacing = int(self.screen_width * 0.08)
+        level_start_x = center_x - ((5 * level_width + 4 * (level_spacing - level_width)) // 2)
+        level_y = content_start_y + int(content_height * 0.15)
         
-        # Botões de algoritmo - Layout horizontal mais compacto e moderno
+        for i in range(1, 6):  # Níveis 1 a 5
+            x = level_start_x + (i - 1) * level_spacing
+            level_buttons[i] = pygame.Rect(x, level_y, level_width, button_height)
+        
+        # Botões de algoritmo com bom espaçamento
         algorithm_buttons = {}
         algorithms = ['bfs', 'dfs', 'ids', 'ucs']
-        for i, alg in enumerate(algorithms):
-            x = center_x - 250 + i * 125
-            y = start_y + button_height + button_spacing
-            algorithm_buttons[alg] = pygame.Rect(x, y, 100, button_height)
+        alg_width = int(self.screen_width * 0.08)
+        alg_spacing = int(self.screen_width * 0.1)
+        alg_start_x = center_x - ((4 * alg_width + 3 * (alg_spacing - alg_width)) // 2)
+        alg_y = level_y + button_height + button_spacing  # Posicionado abaixo dos níveis
         
-        # Botão de iniciar jogo - Maior e mais destacado
+        for i, alg in enumerate(algorithms):
+            x = alg_start_x + i * alg_spacing
+            algorithm_buttons[alg] = pygame.Rect(x, alg_y, alg_width, button_height)
+        
+        # Botões de ação na parte inferior da área de conteúdo
+        action_y = alg_y + button_height + button_spacing + 20
+        
+        # Botão de iniciar jogo - Destacado
         start_button = pygame.Rect(
             center_x - button_width // 2,
-            start_y + 2 * (button_height + button_spacing) + 20,
-            button_width, button_height
+            action_y,
+            button_width, 
+            button_height + 10  # Um pouco mais alto para destaque
+        )
+        
+        # Botão para sair do jogo
+        exit_button = pygame.Rect(
+            center_x - button_width // 2,
+            action_y + button_height + 30,
+            button_width, 
+            button_height
         )
         
         self.buttons = {
             'levels': level_buttons,
             'algorithms': algorithm_buttons,
-            'start': start_button
+            'start': start_button,
+            'exit': exit_button
         }
-    
+        
+        # Armazena as regiões para uso em outros métodos
+        self.layout = {
+            'header': pygame.Rect(0, 0, self.screen_width, header_height),
+            'content': pygame.Rect(0, header_height, self.screen_width, content_height),
+            'footer': pygame.Rect(0, self.screen_height - footer_height, self.screen_width, footer_height),
+            'level_section': pygame.Rect(0, level_y - 60, self.screen_width, button_height + 80),
+            'algorithm_section': pygame.Rect(0, alg_y - 60, self.screen_width, button_height + 80),
+            'action_section': pygame.Rect(0, action_y - 20, self.screen_width, 2*button_height + 60)
+        }
+
     def handle_event(self, event):
         """Trata os eventos do menu.
         
@@ -201,6 +238,12 @@ class MenuView:
         # Verifica se clicou no botão de iniciar jogo
         if self.buttons['start'].collidepoint(pos):
             self.game_controller.start_game(self.selected_level, self.selected_algorithm)
+            return
+        
+        # Verifica se clicou no botão de sair
+        if self.buttons['exit'].collidepoint(pos):
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+            return
     
     def _update_animations(self):
         """Atualiza as animações do menu."""
@@ -272,9 +315,9 @@ class MenuView:
             )
     
     def _draw_glow_effects(self):
-        """Desenha efeitos de brilho."""
-        # Posiciona o brilho principal no centro superior
-        glow_pos = (self.screen_width // 2, 150)
+        """Desenha efeitos de brilho nas áreas apropriadas."""
+        # Brilho no cabeçalho para o título
+        header_glow_pos = (self.screen_width // 2, self.layout['header'].height // 2)
         
         # Calcula a opacidade do brilho com base na animação
         glow_opacity = 30 + 20 * math.sin(self.animations['glow_angle'])
@@ -283,8 +326,8 @@ class MenuView:
         glow_surface = self.assets['glow'].copy()
         glow_surface.set_alpha(int(glow_opacity))
         
-        # Posiciona o brilho centralizado no ponto desejado
-        glow_rect = glow_surface.get_rect(center=glow_pos)
+        # Posiciona o brilho centralizado no cabeçalho
+        glow_rect = glow_surface.get_rect(center=header_glow_pos)
         self.screen.blit(glow_surface, glow_rect)
         
         # Adiciona um segundo brilho menor no botão de iniciar
@@ -295,9 +338,11 @@ class MenuView:
         self.screen.blit(start_glow_surface, start_glow_rect)
     
     def _draw_title(self):
-        """Desenha o título com efeito de onda."""
+        """Desenha o título com efeito de onda na seção de cabeçalho."""
         title_text = "Cake Sorting Puzzle"
-        title_y = 80
+        
+        # Centraliza o título na área de cabeçalho
+        title_y = self.layout['header'].height // 2 - 20
         
         # Renderiza cada letra individualmente para criar o efeito de onda
         x_offset = (self.screen_width - len(title_text) * 30) // 2  # Centraliza o título
@@ -331,11 +376,15 @@ class MenuView:
         mouse_pos = pygame.mouse.get_pos()
         pulse_factor = (math.sin(self.animations['button_pulse']) + 1) / 2  # Valor entre 0 e 1
         
-        # Desenha os botões de nível
+        # Desenha o rótulo da seção de níveis
         level_label = self.fonts['large'].render("Selecione o Nível:", True, self.colors['text'])
-        level_rect = level_label.get_rect(centerx=self.screen_width // 2, top=self.screen_height // 2 - 100)
+        level_rect = level_label.get_rect(
+            centerx=self.screen_width // 2, 
+            bottom=self.layout['level_section'].top + 40
+        )
         self.screen.blit(level_label, level_rect)
         
+        # Desenha os botões de nível
         for level, rect in self.buttons['levels'].items():
             # Verifica se o mouse está sobre o botão ou se está selecionado
             is_hover = rect.collidepoint(mouse_pos)
@@ -369,11 +418,15 @@ class MenuView:
             text_rect = text.get_rect(center=rect.center)
             self.screen.blit(text, text_rect)
         
-        # Desenha os botões de algoritmo
+        # Desenha o rótulo da seção de algoritmos
         alg_label = self.fonts['large'].render("Selecione o Algoritmo:", True, self.colors['text'])
-        alg_rect = alg_label.get_rect(centerx=self.screen_width // 2, top=level_rect.bottom + 70)
+        alg_rect = alg_label.get_rect(
+            centerx=self.screen_width // 2, 
+            bottom=self.layout['algorithm_section'].top + 40
+        )
         self.screen.blit(alg_label, alg_rect)
         
+        # Desenha os botões de algoritmo
         for alg, rect in self.buttons['algorithms'].items():
             # Verifica se o mouse está sobre o botão ou se está selecionado
             is_hover = rect.collidepoint(mouse_pos)
@@ -441,6 +494,35 @@ class MenuView:
         
         # Renderiza o texto
         self.screen.blit(text, text_rect)
+        
+        # Desenha o botão de sair do jogo
+        exit_rect = self.buttons['exit']
+        is_exit_hover = exit_rect.collidepoint(mouse_pos)
+        
+        # Define a cor do botão com efeito de pulsação
+        if is_exit_hover:
+            exit_color = (220, 70, 70)  # Vermelho mais intenso para hover
+            # Aumenta o tamanho do botão quando hover
+            exit_display_rect = exit_rect.inflate(4, 4)
+        else:
+            exit_color = (180, 50, 50)  # Vermelho base para o botão de sair
+            # Pulsa sutilmente mesmo sem hover
+            pulse_amount = 2 * pulse_factor
+            exit_display_rect = exit_rect.inflate(pulse_amount, pulse_amount)
+        
+        # Desenha o botão com cantos arredondados
+        pygame.draw.rect(self.screen, exit_color, exit_display_rect, border_radius=15)
+        
+        # Adiciona um brilho na parte superior do botão para efeito 3D
+        exit_highlight_rect = pygame.Rect(exit_display_rect.x, exit_display_rect.y, 
+                                        exit_display_rect.width, exit_display_rect.height // 3)
+        exit_highlight_color = (min(255, exit_color[0] + 40), min(255, exit_color[1] + 20), min(255, exit_color[2] + 20))
+        pygame.draw.rect(self.screen, exit_highlight_color, exit_highlight_rect, border_radius=15)
+        
+        # Renderiza o texto do botão de sair
+        exit_text = self.fonts['large'].render("SAIR DO JOGO", True, self.colors['button_text'])
+        exit_text_rect = exit_text.get_rect(center=exit_display_rect.center)
+        self.screen.blit(exit_text, exit_text_rect)
     
     def _draw_instructions(self):
         """Desenha as instruções do jogo com estilo moderno."""
@@ -453,41 +535,66 @@ class MenuView:
             "- Atinja a pontuação alvo para vencer o nível"
         ]
         
-        # Cria um painel semi-transparente para as instruções
-        panel_rect = pygame.Rect(
-            self.screen_width // 2 - 350,
-            self.screen_height - 170,
-            700,
-            150
-        )
-        panel_surface = pygame.Surface((panel_rect.width, panel_rect.height), pygame.SRCALPHA)
-        panel_surface.fill((30, 10, 50, 180))  # Cor de fundo semi-transparente
+        # Posiciona o painel na parte mais inferior da tela, ocupando toda a largura
+        panel_width = self.screen_width  # Ocupa toda a largura da tela
+        panel_height = int(self.screen_height * 0.15)  # 15% da altura da tela para o painel
+        panel_y = self.screen_height - panel_height  # Posicionado no fundo da tela
         
-        # Adiciona um brilho na borda do painel
-        pygame.draw.rect(panel_surface, (126, 113, 255, 100), 
-                         pygame.Rect(0, 0, panel_rect.width, panel_rect.height), 2, border_radius=10)
+        panel_rect = pygame.Rect(
+            0,               # Começa na extremidade esquerda
+            panel_y,         # Na parte inferior da tela
+            panel_width,     # Ocupa toda a largura
+            panel_height     # Altura fixa para instruções
+        )
+        
+        # Cria uma superfície semi-transparente para o fundo do painel
+        panel_surface = pygame.Surface((panel_rect.width, panel_rect.height), pygame.SRCALPHA)
+        panel_surface.fill((20, 5, 40, 200))  # Cor de fundo semi-transparente mais escura
+        
+        # Adiciona um gradiente sutil na parte superior para integrar melhor com o resto da tela
+        gradient_height = 10
+        for i in range(gradient_height):
+            alpha = int(200 * (i / gradient_height))  # Gradiente de transparência
+            pygame.draw.line(panel_surface, (20, 5, 40, alpha), 
+                             (0, i), (panel_width, i))
+        
+        # Adiciona uma linha brilhante na borda superior do painel
+        pygame.draw.line(panel_surface, (126, 113, 255, 150), 
+                         (0, 0), (panel_width, 0), 2)
         
         # Desenha o painel
         self.screen.blit(panel_surface, panel_rect)
         
         # Desenha o ícone do bolo
         cake_icon = self.assets['cake_icon']
-        cake_rect = cake_icon.get_rect(topleft=(panel_rect.left + 20, panel_rect.top + 10))
+        cake_icon = pygame.transform.scale(cake_icon, (50, 50))  # Um pouco menor
+        cake_rect = cake_icon.get_rect(topleft=(panel_rect.left + 30, panel_rect.top + 15))
         self.screen.blit(cake_icon, cake_rect)
         
-        # Renderiza as instruções
-        y = panel_rect.top + 15
-        for i, instruction in enumerate(instructions):
+        # Renderiza as instruções em duas colunas para melhor aproveitamento do espaço
+        col_width = (panel_width - 120) // 2  # Largura de cada coluna (menos margens)
+        
+        # Primeira metade das instruções (coluna esquerda)
+        col1_x = cake_rect.right + 20
+        for i in range(min(3, len(instructions))):
+            y = panel_rect.top + 15 + i * 25
+            
             # O título tem estilo diferente
             if i == 0:
-                text = self.fonts['medium'].render(instruction, True, self.colors['selected'])
-                rect = text.get_rect(topleft=(panel_rect.left + 90, y))
+                text = self.fonts['medium'].render(instructions[i], True, self.colors['selected'])
             else:
-                text = self.fonts['small'].render(instruction, True, self.colors['text'])
-                rect = text.get_rect(topleft=(panel_rect.left + 30, y))
+                text = self.fonts['small'].render(instructions[i], True, self.colors['text'])
             
+            rect = text.get_rect(topleft=(col1_x, y))
             self.screen.blit(text, rect)
-            y += 25
+        
+        # Segunda metade das instruções (coluna direita)
+        col2_x = col1_x + col_width
+        for i in range(3, len(instructions)):
+            y = panel_rect.top + 15 + (i - 3) * 25
+            text = self.fonts['small'].render(instructions[i], True, self.colors['text'])
+            rect = text.get_rect(topleft=(col2_x, y))
+            self.screen.blit(text, rect)
     
     def render(self):
         """Renderiza o menu na tela com efeitos visuais modernos."""
