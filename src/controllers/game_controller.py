@@ -44,12 +44,13 @@ class GameController:
         self.auto_solve_step = 0
         self.auto_solve_timer = 0
     
-    def start_game(self, level=1, algorithm='bfs'):
+    def start_game(self, level=1, algorithm='bfs', game_mode='ai'):
         """Inicia um novo jogo.
         
         Args:
             level (int): Nível do jogo.
             algorithm (str): Algoritmo de busca a ser utilizado.
+            game_mode (str): Modo de jogo ('ai' ou 'human').
         """
         self.game_state = GameState(level)
         self.game_view = GameView(self.screen, self.game_state)
@@ -59,6 +60,7 @@ class GameController:
         self.solution_path = None
         self.auto_solve = False
         self.auto_solve_step = 0
+        self.game_mode = game_mode
     
     def end_game(self):
         """Encerra o jogo atual e retorna ao menu."""

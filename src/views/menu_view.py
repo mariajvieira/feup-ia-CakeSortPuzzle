@@ -51,7 +51,9 @@ class MenuView:
             'title_gradient_1': (255, 113, 206),  # Rosa neon
             'title_gradient_2': (126, 113, 255),  # Azul/roxo neon
             'particle': (255, 255, 255, 150),  # Branco translúcido
-            'glow': (200, 100, 255, 30)  # Brilho roxo
+            'glow': (200, 100, 255, 30),  # Brilho roxo
+            'human_mode': (50, 205, 50),  # Verde para o modo humano
+            'ai_mode': (0, 191, 255)  # Azul para o modo IA
         }
         
         # Inicializa as fontes - Usando fontes mais modernas
@@ -72,6 +74,7 @@ class MenuView:
         # Inicializa as seleções
         self.selected_level = 1
         self.selected_algorithm = 'bfs'
+        self.selected_game_mode = 'ai'  # Modo padrão: IA
         
         # Inicializa os botões com design moderno
         self._init_buttons()
@@ -94,11 +97,13 @@ class MenuView:
         """Carrega os recursos gráficos necessários."""
         assets = {}
         try:
+            import os
             # Carrega os SVGs como superfícies pygame
-            particle_svg = pygame.image.load('/Users/duartemarques/Desktop/IA_GAME/assets/images/particle.svg')
-            glow_svg = pygame.image.load('/Users/duartemarques/Desktop/IA_GAME/assets/images/glow.svg')
-            play_button_svg = pygame.image.load('/Users/duartemarques/Desktop/IA_GAME/assets/images/play_button.svg')
-            cake_icon_svg = pygame.image.load('/Users/duartemarques/Desktop/IA_GAME/assets/images/cake_icon.svg')
+            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            particle_svg = pygame.image.load(os.path.join(base_path, 'assets', 'images', 'particle.svg'))
+            glow_svg = pygame.image.load(os.path.join(base_path, 'assets', 'images', 'glow.svg'))
+            play_button_svg = pygame.image.load(os.path.join(base_path, 'assets', 'images', 'play_button.svg'))
+            cake_icon_svg = pygame.image.load(os.path.join(base_path, 'assets', 'images', 'cake_icon.svg'))
             
             # Redimensiona conforme necessário
             assets['particle'] = pygame.transform.scale(particle_svg, (20, 20))
@@ -170,9 +175,21 @@ class MenuView:
         for i, alg in enumerate(algorithms):
             x = alg_start_x + i * alg_spacing
             algorithm_buttons[alg] = pygame.Rect(x, alg_y, alg_width, button_height)
+            
+        # Botões de modo de jogo
+        game_mode_buttons = {}
+        modes = ['ai', 'human']
+        mode_width = int(self.screen_width * 0.12)
+        mode_spacing = int(self.screen_width * 0.15)
+        mode_start_x = center_x - mode_spacing // 2
+        mode_y = alg_y + button_height + button_spacing  # Posicionado abaixo dos algoritmos
+        
+        for i, mode in enumerate(modes):
+            x = mode_start_x + i * mode_spacing - mode_width // 2
+            game_mode_buttons[mode] = pygame.Rect(x, mode_y, mode_width, button_height)
         
         # Botões de ação na parte inferior da área de conteúdo
-        action_y = alg_y + button_height + button_spacing + 20
+        action_y = mode_y + button_height + button_spacing + 20
         
         # Botão de iniciar jogo - Destacado
         start_button = pygame.Rect(
@@ -193,6 +210,7 @@ class MenuView:
         self.buttons = {
             'levels': level_buttons,
             'algorithms': algorithm_buttons,
+            'game_modes': game_mode_buttons,
             'start': start_button,
             'exit': exit_button
         }
@@ -204,6 +222,7 @@ class MenuView:
             'footer': pygame.Rect(0, self.screen_height - footer_height, self.screen_width, footer_height),
             'level_section': pygame.Rect(0, level_y - 60, self.screen_width, button_height + 80),
             'algorithm_section': pygame.Rect(0, alg_y - 60, self.screen_width, button_height + 80),
+            'game_mode_section': pygame.Rect(0, mode_y - 60, self.screen_width, button_height + 80),
             'action_section': pygame.Rect(0, action_y - 20, self.screen_width, 2*button_height + 60)
         }
 
@@ -231,19 +250,42 @@ class MenuView:
         
         # Verifica se clicou em um botão de algoritmo
         for alg, rect in self.buttons['algorithms'].items():
-            if rect.collidepoint(pos):
+            if rect.collidepoint(pos) and self.selected_game_mode == 'ai':
                 self.selected_algorithm = alg
+                return
+                
+        # Verifica se clicou em um botão de modo de jogo
+        for mode, rect in self.buttons['game_modes'].items():
+            if rect.collidepoint(pos):
+                self.selected_game_mode = mode
+                # Desativa os botões de algoritmo no modo humano
+                if mode == 'human':
+                    self._disable_algorithm_buttons()
+                else:
+                    self._enable_algorithm_buttons()
                 return
         
         # Verifica se clicou no botão de iniciar jogo
         if self.buttons['start'].collidepoint(pos):
-            self.game_controller.start_game(self.selected_level, self.selected_algorithm)
+            self.game_controller.start_game(self.selected_level, self.selected_algorithm, self.selected_game_mode)
             return
         
         # Verifica se clicou no botão de sair
         if self.buttons['exit'].collidepoint(pos):
             pygame.event.post(pygame.event.Event(pygame.QUIT))
             return
+    
+    def _disable_algorithm_buttons(self):
+        """Desativa os botões de algoritmo."""
+        for alg, rect in self.buttons['algorithms'].items():
+            rect.width = 0
+            rect.height = 0
+
+    def _enable_algorithm_buttons(self):
+        """Ativa os botões de algoritmo."""
+        for alg, rect in self.buttons['algorithms'].items():
+            rect.width = int(self.screen_width * 0.08)
+            rect.height = int(self.screen_height * 0.06)
     
     def _update_animations(self):
         """Atualiza as animações do menu."""
@@ -371,6 +413,30 @@ class MenuView:
             text_pos = (x_offset + i * 30, title_y + wave_offset)
             self.screen.blit(text_char, text_pos)
     
+    def _update_animations(self):
+        """Atualiza as animações do menu."""
+        # Atualiza a animação de onda do título
+        self.animations['title_wave'] = (self.animations['title_wave'] + 0.05) % (2 * math.pi)
+        
+        # Atualiza o ângulo do brilho
+        self.animations['glow_angle'] = (self.animations['glow_angle'] + 0.01) % (2 * math.pi)
+        
+        # Atualiza a pulsação dos botões
+        self.animations['button_pulse'] = (self.animations['button_pulse'] + 0.03) % (2 * math.pi)
+        
+        # Atualiza as partículas
+        for particle in self.particles:
+            # Move a partícula
+            particle['x'] += math.cos(particle['angle']) * particle['speed']
+            particle['y'] += math.sin(particle['angle']) * particle['speed']
+            
+            # Se a partícula sair da tela, reposiciona
+            if (particle['x'] < 0 or particle['x'] > self.screen_width or
+                particle['y'] < 0 or particle['y'] > self.screen_height):
+                particle['x'] = random.randint(0, self.screen_width)
+                particle['y'] = random.randint(0, self.screen_height)
+                particle['angle'] = random.uniform(0, 2 * math.pi)
+
     def _draw_buttons(self):
         """Desenha os botões do menu com efeitos modernos."""
         mouse_pos = pygame.mouse.get_pos()
@@ -457,6 +523,52 @@ class MenuView:
             
             # Renderiza o texto do botão
             text = self.fonts['medium'].render(alg.upper(), True, self.colors['button_text'])
+            text_rect = text.get_rect(center=rect.center)
+            self.screen.blit(text, text_rect)
+        
+        # Desenha o rótulo da seção de modos de jogo
+        mode_label = self.fonts['large'].render("Selecione o Modo de Jogo:", True, self.colors['text'])
+        mode_rect = mode_label.get_rect(
+            centerx=self.screen_width // 2, 
+            bottom=self.layout['game_mode_section'].top + 40
+        )
+        self.screen.blit(mode_label, mode_rect)
+        
+        # Desenha os botões de modo de jogo
+        for mode, rect in self.buttons['game_modes'].items():
+            # Verifica se o mouse está sobre o botão ou se está selecionado
+            is_hover = rect.collidepoint(mouse_pos)
+            is_selected = mode == self.selected_game_mode
+            
+            # Define a cor do botão baseada no modo
+            if is_selected:
+                if mode == 'human':
+                    base_color = self.colors['human_mode']
+                else:  # mode == 'ai'
+                    base_color = self.colors['ai_mode']
+            elif is_hover:
+                base_color = self.colors['button_hover']
+            else:
+                base_color = self.colors['button']
+            
+            # Adiciona efeito de pulsação para botões selecionados
+            if is_selected:
+                # Cria um efeito de brilho pulsante ao redor do botão
+                glow_size = 4 + 2 * pulse_factor
+                glow_rect = rect.inflate(glow_size, glow_size)
+                pygame.draw.rect(self.screen, base_color, glow_rect, border_radius=10)
+            
+            # Desenha o botão com cantos arredondados
+            pygame.draw.rect(self.screen, base_color, rect, border_radius=10)
+            
+            # Adiciona um brilho na parte superior do botão para efeito 3D
+            highlight_rect = pygame.Rect(rect.x, rect.y, rect.width, rect.height // 3)
+            highlight_color = (min(255, base_color[0] + 40), min(255, base_color[1] + 40), min(255, base_color[2] + 40))
+            pygame.draw.rect(self.screen, highlight_color, highlight_rect, border_radius=10)
+            
+            # Renderiza o texto do botão
+            mode_text = "Modo Humano" if mode == "human" else "Modo IA"
+            text = self.fonts['medium'].render(mode_text, True, self.colors['button_text'])
             text_rect = text.get_rect(center=rect.center)
             self.screen.blit(text, text_rect)
         

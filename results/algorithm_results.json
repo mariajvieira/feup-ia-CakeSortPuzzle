@@ -1,0 +1,233 @@
+[
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 34,
+        "states_generated": 783,
+        "max_memory_kb": 1649.201171875,
+        "execution_time": 0.8025472164154053,
+        "timestamp": "2025-04-06 00:53:37"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 38,
+        "states_generated": 825,
+        "max_memory_kb": 1633.42578125,
+        "execution_time": 2.064552068710327,
+        "timestamp": "2025-04-06 01:35:18"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 2,
+        "success": true,
+        "path_length": 52,
+        "states_generated": 1083,
+        "max_memory_kb": 2775.6962890625,
+        "execution_time": 2.1389410495758057,
+        "timestamp": "2025-04-06 01:38:32"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 2,
+        "success": true,
+        "path_length": 38,
+        "states_generated": 831,
+        "max_memory_kb": 2109.849609375,
+        "execution_time": 1.1275417804718018,
+        "timestamp": "2025-04-06 01:38:35"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 30,
+        "states_generated": 588,
+        "max_memory_kb": 1315.4736328125,
+        "execution_time": 0.8825368881225586,
+        "timestamp": "2025-04-06 01:51:00"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 30,
+        "states_generated": 543,
+        "max_memory_kb": 1219.52734375,
+        "execution_time": 1.0296261310577393,
+        "timestamp": "2025-04-06 13:15:08"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 2,
+        "success": true,
+        "path_length": 52,
+        "states_generated": 1053,
+        "max_memory_kb": 2616.6806640625,
+        "execution_time": 2.5405828952789307,
+        "timestamp": "2025-04-06 13:16:06"
+    },
+    {
+        "algorithm": "ids",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 48,
+        "max_memory_kb": 87.2431640625,
+        "execution_time": 0.05560755729675293,
+        "timestamp": "2025-04-06 13:24:21"
+    },
+    {
+        "algorithm": "ids",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 48,
+        "max_memory_kb": 87.2568359375,
+        "execution_time": 0.07116842269897461,
+        "timestamp": "2025-04-06 13:26:50"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 35,
+        "states_generated": 597,
+        "max_memory_kb": 1381.2021484375,
+        "execution_time": 0.9773495197296143,
+        "timestamp": "2025-04-06 13:27:51"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 510,
+        "max_memory_kb": 1133.9912109375,
+        "execution_time": 0.5956189632415771,
+        "timestamp": "2025-04-06 13:37:22"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 477,
+        "max_memory_kb": 1088.0458984375,
+        "execution_time": 0.7553887367248535,
+        "timestamp": "2025-04-06 13:56:10"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 570,
+        "max_memory_kb": 1283.900390625,
+        "execution_time": 0.8635199069976807,
+        "timestamp": "2025-04-06 14:17:10"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "success": true,
+        "path_length": 15,
+        "states_generated": 1890,
+        "max_memory_kb": 3869.724609375,
+        "execution_time": 3.2873096466064453,
+        "timestamp": "2025-04-06 14:18:47"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "success": true,
+        "path_length": 14,
+        "states_generated": 867,
+        "max_memory_kb": 1505.177734375,
+        "execution_time": 0.7164134979248047,
+        "timestamp": "2025-04-06 14:19:16"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 567,
+        "max_memory_kb": 1298.8505859375,
+        "execution_time": 0.8697280883789062,
+        "timestamp": "2025-04-06 14:24:12"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": false,
+        "path_length": 0,
+        "states_generated": 510,
+        "max_memory_kb": 1197.9208984375,
+        "execution_time": 0.3993403911590576,
+        "timestamp": "2025-04-06 15:29:35"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "success": true,
+        "path_length": 18,
+        "states_generated": 1806,
+        "max_memory_kb": 3940.6416015625,
+        "execution_time": 1.614849328994751,
+        "timestamp": "2025-04-06 15:29:43"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "success": true,
+        "path_length": 15,
+        "states_generated": 837,
+        "max_memory_kb": 1609.7470703125,
+        "execution_time": 1.4313700199127197,
+        "timestamp": "2025-04-06 15:41:05"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 2,
+        "success": true,
+        "path_length": 23,
+        "states_generated": 4797,
+        "max_memory_kb": 11376.3671875,
+        "execution_time": 5.019899606704712,
+        "timestamp": "2025-04-06 16:12:45"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 29,
+        "states_generated": 696,
+        "max_memory_kb": 1639.70703125,
+        "execution_time": 0.8026914596557617,
+        "timestamp": "2025-04-06 16:53:44"
+    }
+]
