@@ -7,6 +7,7 @@ entre o modelo e a visualização.
 """
 
 import pygame
+import time  # Adicione esta importação no topo do arquivo
 from src.models.game_state import GameState
 from src.views.game_view import GameView
 from src.algorithms.search_algorithms import get_algorithm
@@ -25,6 +26,7 @@ class GameController:
         solution_path (list): Caminho da solução encontrado pelo algoritmo.
         auto_solve (bool): Indica se o modo de solução automática está ativado.
         auto_solve_step (int): Passo atual na solução automática.
+        solution_time (float): Tempo que o algoritmo levou para encontrar a solução.
     """
     
     def __init__(self, screen):
@@ -43,23 +45,19 @@ class GameController:
         self.auto_solve = False
         self.auto_solve_step = 0
         self.auto_solve_timer = 0
+        self.solution_time = 0  # Tempo que o algoritmo levou para encontrar a solução
     
     def start_game(self, level=1, algorithm='bfs', game_mode='ai'):
-        """Inicia um novo jogo.
-        
-        Args:
-            level (int): Nível do jogo.
-            algorithm (str): Algoritmo de busca a ser utilizado.
-            game_mode (str): Modo de jogo ('ai' ou 'human').
-        """
+        """Inicia um novo jogo."""
         self.game_state = GameState(level)
-        self.game_view = GameView(self.screen, self.game_state)
+        self.game_view = GameView(self.screen, self.game_state, self)  # Passa a referência para o controlador
         self.in_game = True
         self.selected_plate = -1
         self.algorithm = algorithm
         self.solution_path = None
         self.auto_solve = False
         self.auto_solve_step = 0
+        self.solution_time = 0  # Reseta o tempo da solução
         self.game_mode = game_mode
         
         # Se estiver no modo AI, iniciar a solução automática
@@ -175,17 +173,67 @@ class GameController:
             self.game_view.render(self.selected_plate)
     
     def solve_game(self):
-        """Resolve o jogo usando o algoritmo selecionado."""
+        """Resolve o jogo usando o algoritmo selecionado e mede o tempo de execução."""
         if self.game_state and not self.game_state.game_over:
             # Obtém a função do algoritmo
             algorithm_func = get_algorithm(self.algorithm)
             if algorithm_func:
+                # Mede o tempo de início
+                start_time = time.time()
+                
                 # Executa o algoritmo
                 success, path = algorithm_func(self.game_state.clone())
+                
+                # Mede o tempo de fim e calcula a duração
+                end_time = time.time()
+                self.solution_time = end_time - start_time
+                
                 if success:
                     self.solution_path = path
+                    # Registra o resultado no arquivo de log (opcional)
+                    self._log_algorithm_result(success, len(path))
                     return True
         return False
+    
+    def _log_algorithm_result(self, success, path_length):
+        """Registra o resultado do algoritmo em um arquivo para análise posterior."""
+        import json
+        import os
+        from datetime import datetime
+        
+        # Dados a serem salvos
+        result = {
+            "algorithm": self.algorithm,
+            "heuristic": "N/A",
+            "level": self.game_state.level,
+            "success": success,
+            "path_length": path_length if success else 0,
+            "states_generated": len(self.solution_path) if success else 0,
+            "max_memory_kb": 0,  # Calcularia o uso de memória aqui se tivéssemos essa info
+            "execution_time": self.solution_time,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # Garante que o diretório de resultados existe
+        results_dir = os.path.join(os.getcwd(), "results")
+        os.makedirs(results_dir, exist_ok=True)
+        
+        # Nome do arquivo de log
+        log_file = os.path.join(results_dir, "algorithm_results.json")
+        
+        # Lê o arquivo existente ou cria um novo
+        if os.path.exists(log_file):
+            with open(log_file, "r") as file:
+                data = json.load(file)
+        else:
+            data = []
+        
+        # Adiciona o novo resultado
+        data.append(result)
+        
+        # Escreve de volta no arquivo
+        with open(log_file, "w") as file:
+            json.dump(data, file, indent=4)
     
     def toggle_auto_solve(self):
         """Ativa/desativa a solução automática."""

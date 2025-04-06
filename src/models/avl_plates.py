@@ -29,7 +29,13 @@ class AvailablePlates:
             level (int): Nível do jogo, que influencia a complexidade dos pratos.
         """
         self.max_plates = 3  # Número máximo de pratos visíveis simultaneamente
-        self.total_plate_limit = 18  # Limite total de pratos no jogo
+        
+        # Define o limite total de pratos com base no nível
+        if level == 1:
+            self.total_plate_limit = 4  # Nível 1: apenas 4 pratos (atualizado de 6)
+        else:
+            self.total_plate_limit = 18  # Outros níveis: 18 pratos
+            
         self.plates_used = 0  # Contador de pratos já utilizados
         
         # Define os tipos de fatias disponíveis com base no nível
@@ -39,7 +45,7 @@ class AvailablePlates:
         self.visible_plates = []
         self.plates_queue = []
         
-        # Gera todos os pratos para o jogo (18 pratos)
+        # Gera todos os pratos para o jogo
         self._generate_all_plates(level)
         
         # Mostra os primeiros 3 pratos

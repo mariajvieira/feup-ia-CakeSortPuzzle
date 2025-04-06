@@ -54,13 +54,13 @@ class GameState:
         Returns:
             tuple: Tupla contendo (linhas, colunas) do tabuleiro.
         """
-        # Tamanhos de tabuleiro para diferentes níveis
+        # Tamanhos de tabuleiro para diferentes níveis (reduzidos)
         sizes = {
-            1: (4, 4),  # Nível 1: 4x4
-            2: (4, 5),  # Nível 2: 4x5
-            3: (5, 5),  # Nível 3: 5x5
-            4: (5, 6),  # Nível 4: 5x6
-            5: (6, 6)   # Nível 5: 6x6
+            1: (3, 3),  # Nível 1: 3x3 (era 4x4)
+            2: (3, 4),  # Nível 2: 3x4 (era 4x5)
+            3: (4, 4),  # Nível 3: 4x4 (era 5x5)
+            4: (4, 5),  # Nível 4: 4x5 (era 5x6)
+            5: (5, 5)   # Nível 5: 5x5 (era 6x6)
         }
         
         # Retorna o tamanho correspondente ao nível ou o maior tamanho disponível

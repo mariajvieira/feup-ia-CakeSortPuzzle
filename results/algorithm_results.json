@@ -229,5 +229,93 @@
         "max_memory_kb": 1639.70703125,
         "execution_time": 0.8026914596557617,
         "timestamp": "2025-04-06 16:53:44"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 18,
+        "states_generated": 18,
+        "max_memory_kb": 0,
+        "execution_time": 0.1671428680419922,
+        "timestamp": "2025-04-06 22:49:16"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 18,
+        "states_generated": 18,
+        "max_memory_kb": 0,
+        "execution_time": 0.06088709831237793,
+        "timestamp": "2025-04-06 23:01:26"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 18,
+        "states_generated": 18,
+        "max_memory_kb": 0,
+        "execution_time": 0.056622982025146484,
+        "timestamp": "2025-04-06 23:01:45"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 17,
+        "states_generated": 17,
+        "max_memory_kb": 0,
+        "execution_time": 1.1535789966583252,
+        "timestamp": "2025-04-06 23:01:46"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 18,
+        "states_generated": 18,
+        "max_memory_kb": 0,
+        "execution_time": 0.06416893005371094,
+        "timestamp": "2025-04-06 23:02:06"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 6,
+        "states_generated": 6,
+        "max_memory_kb": 0,
+        "execution_time": 0.02338695526123047,
+        "timestamp": "2025-04-06 23:25:58"
+    },
+    {
+        "algorithm": "bfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 6,
+        "states_generated": 6,
+        "max_memory_kb": 0,
+        "execution_time": 219.9705560207367,
+        "timestamp": "2025-04-06 23:29:50"
+    },
+    {
+        "algorithm": "bfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "success": true,
+        "path_length": 4,
+        "states_generated": 4,
+        "max_memory_kb": 0,
+        "execution_time": 2.8604252338409424,
+        "timestamp": "2025-04-06 23:33:20"
     }
 ]

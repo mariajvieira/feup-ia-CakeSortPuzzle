@@ -296,17 +296,10 @@ def ucs(initial_state):
 
 
 def get_algorithm(algorithm_name):
-    """Retorna a função de algoritmo correspondente ao nome.
-    
-    Args:
-        algorithm_name (str): Nome do algoritmo ('bfs', 'dfs', 'ids', 'ucs').
-        
-    Returns:
-        function: Função do algoritmo correspondente ou None se não encontrado.
-    """
+    """Retorna a função de algoritmo correspondente ao nome."""
     algorithms = {
         'bfs': bfs,
-        'dfs': lambda state: dfs(state, depth_limit=state.avl_plates.total_plate_limit * 2),
+        'dfs': lambda state: dfs(state, depth_limit=state.avl_plates.total_plate_limit * 3),
         'ids': ids,
         'ucs': ucs
     }

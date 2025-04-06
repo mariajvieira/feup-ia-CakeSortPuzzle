@@ -23,15 +23,17 @@ class GameView:
         plate_rects (list): Lista de retângulos que representam os pratos disponíveis.
     """
     
-    def __init__(self, screen, game_state):
+    def __init__(self, screen, game_state, game_controller=None):
         """Inicializa a visualização do jogo.
         
         Args:
             screen (pygame.Surface): Superfície de renderização do jogo.
             game_state (GameState): Estado atual do jogo.
+            game_controller (GameController, optional): Controlador do jogo.
         """
         self.screen = screen
         self.game_state = game_state
+        self.game_controller = game_controller  # Referência ao controlador
         
         # Define as cores utilizadas no jogo (esquema colorido com cores distintas)
         self.colors = {
@@ -311,9 +313,27 @@ class GameView:
         
         # Renderiza o número de pratos restantes
         plates_remaining = self.game_state.avl_plates.get_remaining_plates()
-        plates_text = self.fonts['medium'].render(f"Pratos Restantes: {plates_remaining}/18", True, self.colors['text'])
+        total_plates = self.game_state.avl_plates.total_plate_limit
+        plates_text = self.fonts['medium'].render(f"Pratos Restantes: {plates_remaining}/{total_plates}", True, self.colors['text'])
         plates_rect = plates_text.get_rect(left=10, top=moves_rect.bottom + 5)
         self.screen.blit(plates_text, plates_rect)
+        
+        # Renderiza o algoritmo selecionado e o tempo de solução
+        if hasattr(self, 'game_controller') and self.game_controller:
+            # Adiciona o algoritmo selecionado
+            algorithm_text = self.fonts['medium'].render(
+                f"Algoritmo: {self.game_controller.algorithm.upper()}", 
+                True, self.colors['text'])
+            algorithm_rect = algorithm_text.get_rect(right=self.screen.get_width() - 10, top=10)
+            self.screen.blit(algorithm_text, algorithm_rect)
+            
+            # Adiciona o tempo de solução se disponível
+            if self.game_controller.solution_time > 0:
+                time_text = self.fonts['medium'].render(
+                    f"Tempo de solução: {self.game_controller.solution_time:.3f}s", 
+                    True, self.colors['text'])
+                time_rect = time_text.get_rect(right=self.screen.get_width() - 10, top=algorithm_rect.bottom + 5)
+                self.screen.blit(time_text, time_rect)
         
         # Renderiza as instruções
         instructions = [
@@ -323,7 +343,7 @@ class GameView:
             "- Pressione ESC para voltar ao menu",
             "- Pressione S para resolver automaticamente",
             "- Pressione A para ativar/desativar solução automática",
-            "- Complete todos os 18 pratos sem preencher o tabuleiro para vencer"
+            f"- Complete todos os {total_plates} pratos sem preencher o tabuleiro para vencer"
         ]
         
         y = self.screen.get_height() - 140
