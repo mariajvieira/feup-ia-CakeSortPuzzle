@@ -94,32 +94,33 @@ class MenuView:
     
     def _init_buttons(self):
         button_width = int(self.screen_width * 0.18)
-        button_height = int(self.screen_height * 0.06)
-        button_spacing = int(self.screen_height * 0.08)
+        button_height = int(self.screen_height * 0.055)  # Ligeiramente menor 
+        button_spacing = int(self.screen_height * 0.06)  # REDUZIDO para aproximar os botões
         
-        header_height = int(self.screen_height * 0.2) 
-        footer_height = int(self.screen_height * 0.25)  
-        content_height = self.screen_height - header_height - footer_height  
+        # Divisão clara da tela em seções
+        header_height = int(self.screen_height * 0.2)  # Seção superior para título
+        footer_height = int(self.screen_height * 0.25)  # Seção inferior para instruções
+        content_height = self.screen_height - header_height - footer_height  # Área central para interação
         
         center_x = self.screen_width // 2
-        content_start_y = header_height + int(content_height * 0.1) 
+        content_start_y = header_height + int(content_height * 0.1)  # 10% de margem superior
         
         level_buttons = {}
         level_width = int(self.screen_width * 0.06)
         level_spacing = int(self.screen_width * 0.08)
         level_start_x = center_x - ((5 * level_width + 4 * (level_spacing - level_width)) // 2)
-        level_y = content_start_y + int(content_height * 0.15)
+        level_y = content_start_y + int(content_height * 0.10)  # REDUZIDO para subir
         
         for i in range(1, 6): 
             x = level_start_x + (i - 1) * level_spacing
             level_buttons[i] = pygame.Rect(x, level_y, level_width, button_height)
         
         algorithm_buttons = {}
-        algorithms = ['bfs', 'dfs', 'ids', 'ucs', 'greedy', 'astar', 'wastar'] 
-        alg_width = int(self.screen_width * 0.06) 
-        alg_spacing = int(self.screen_width * 0.08) 
-        alg_start_x = center_x - ((7 * alg_width + 6 * (alg_spacing - alg_width)) // 2)  
-        alg_y = level_y + button_height + button_spacing  
+        algorithms = ['bfs', 'dfs', 'ids', 'ucs', 'greedy', 'astar', 'wastar']  # Adicionado 'wastar'
+        alg_width = int(self.screen_width * 0.06)  # Reduzido para acomodar mais botões
+        alg_spacing = int(self.screen_width * 0.08)  # Ajustado espaçamento
+        alg_start_x = center_x - ((7 * alg_width + 6 * (alg_spacing - alg_width)) // 2)  # Ajustado para 7 algoritmos
+        alg_y = level_y + button_height + button_spacing  # Posicionado abaixo dos níveis
         
         for i, alg in enumerate(algorithms):
             x = alg_start_x + i * alg_spacing
@@ -130,24 +131,26 @@ class MenuView:
         mode_width = int(self.screen_width * 0.12)
         mode_spacing = int(self.screen_width * 0.15)
         mode_start_x = center_x - mode_spacing // 2
-        mode_y = alg_y + button_height + button_spacing 
+        mode_y = alg_y + button_height + button_spacing  # Posicionado abaixo dos algoritmos
         
         for i, mode in enumerate(modes):
             x = mode_start_x + i * mode_spacing - mode_width // 2
             game_mode_buttons[mode] = pygame.Rect(x, mode_y, mode_width, button_height)
         
+        # Botões de ação na parte inferior da área de conteúdo
         action_y = mode_y + button_height + button_spacing + 20
         
         start_button = pygame.Rect(
             center_x - button_width // 2,
             action_y,
             button_width, 
-            button_height + 10  
+            button_height + 10  # Um pouco mais alto para destaque
         )
         
+        # Botão para sair do jogo
         exit_button = pygame.Rect(
             center_x - button_width // 2,
-            action_y + button_height + 30,
+            action_y + button_height + 15,  # Espaçamento reduzido
             button_width, 
             button_height
         )
@@ -157,17 +160,20 @@ class MenuView:
             'algorithms': algorithm_buttons,
             'game_modes': game_mode_buttons,
             'start': start_button,
-            'exit': exit_button
+            'exit': exit_button,
+            'files': file_buttons
         }
         
+        # Armazena as regiões para uso em outros métodos
         self.layout = {
             'header': pygame.Rect(0, 0, self.screen_width, header_height),
             'content': pygame.Rect(0, header_height, self.screen_width, content_height),
             'footer': pygame.Rect(0, self.screen_height - footer_height, self.screen_width, footer_height),
-            'level_section': pygame.Rect(0, level_y - 60, self.screen_width, button_height + 80),
-            'algorithm_section': pygame.Rect(0, alg_y - 60, self.screen_width, button_height + 80),
-            'game_mode_section': pygame.Rect(0, mode_y - 60, self.screen_width, button_height + 80),
-            'action_section': pygame.Rect(0, action_y - 20, self.screen_width, 2*button_height + 60)
+            'level_section': pygame.Rect(0, level_y - 40, self.screen_width, button_height + 60),
+            'algorithm_section': pygame.Rect(0, alg_y - 40, self.screen_width, button_height + 60),
+            'game_mode_section': pygame.Rect(0, mode_y - 40, self.screen_width, button_height + 60),
+            'file_section': pygame.Rect(0, file_y - 40, self.screen_width, button_height + 60),
+            'action_section': pygame.Rect(0, action_y - 20, self.screen_width, 2*button_height + 40)
         }
 
     def handle_event(self, event):
@@ -202,6 +208,63 @@ class MenuView:
         if self.buttons['exit'].collidepoint(pos):
             pygame.event.post(pygame.event.Event(pygame.QUIT))
             return
+        
+        # Verifica se clicou em um botão de arquivo
+        for action, rect in self.buttons['files'].items():
+            if rect.collidepoint(pos):
+                if action == 'load':
+                    self._handle_load_state()
+                elif action == 'save':
+                    self._handle_save_state()
+                return
+    
+    def _handle_load_state(self):
+        """Abre uma caixa de diálogo para selecionar um arquivo para carregar."""
+        import tkinter as tk
+        from tkinter import filedialog
+        
+        # Cria uma janela tkinter oculta para abrir o diálogo
+        root = tk.Tk()
+        root.withdraw()
+        
+        # Abre a caixa de diálogo
+        file_path = filedialog.askopenfilename(
+            title="Carregar Estado do Jogo",
+            filetypes=[("Arquivos de Texto", "*.txt"), ("Todos os Arquivos", "*.*")]
+        )
+        
+        if file_path:
+            # Carrega o estado do arquivo
+            from src.models.game_state import GameState
+            loaded_state = GameState.load_from_file(file_path)
+            
+            if loaded_state:
+                # Inicia o jogo com o estado carregado
+                self.game_controller.start_game_with_state(loaded_state, self.selected_algorithm, self.selected_game_mode)
+
+    def _handle_save_state(self):
+        """Salva o estado atual do jogo se estiver em andamento."""
+        # Verifica se há um jogo em andamento
+        if not hasattr(self.game_controller, 'game_state') or self.game_controller.game_state is None:
+            return
+        
+        import tkinter as tk
+        from tkinter import filedialog
+        
+        # Cria uma janela tkinter oculta para abrir o diálogo
+        root = tk.Tk()
+        root.withdraw()
+        
+        # Abre a caixa de diálogo
+        file_path = filedialog.asksaveasfilename(
+            title="Salvar Estado do Jogo",
+            defaultextension=".txt",
+            filetypes=[("Arquivos de Texto", "*.txt"), ("Todos os Arquivos", "*.*")]
+        )
+        
+        if file_path:
+            # Salva o estado no arquivo
+            self.game_controller.game_state.save_to_file(file_path)
     
     def _disable_algorithm_buttons(self):
         """Desativa os botões de algoritmo."""
@@ -434,6 +497,7 @@ class MenuView:
             text_rect = text.get_rect(center=rect.center)
             self.screen.blit(text, text_rect)
         
+        # Desenha o botão de iniciar jogo com efeitos especiais
         start_rect = self.buttons['start']
         is_hover = start_rect.collidepoint(mouse_pos)
         

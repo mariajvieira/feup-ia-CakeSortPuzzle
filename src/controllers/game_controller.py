@@ -66,6 +66,25 @@ class GameController:
             self.auto_solve_timer = 60  # Aproximadamente 1 segundo em 60 FPS
             # Definir um flag para indicar que devemos resolver após o atraso
             self.start_solving = True
+
+    def start_game_with_state(self, game_state, algorithm='bfs', game_mode='ai'):
+        """Inicia um jogo com um estado pré-carregado.
+        
+        Args:
+            game_state (GameState): Estado do jogo pré-carregado.
+            algorithm (str): Algoritmo de busca a ser utilizado.
+            game_mode (str): Modo de jogo ('ai' ou 'human').
+        """
+        self.game_state = game_state
+        self.game_view = GameView(self.screen, self.game_state, self)
+        self.in_game = True
+        self.selected_plate = -1
+        self.algorithm = algorithm
+        self.solution_path = None
+        self.auto_solve = False
+        self.auto_solve_step = 0
+        self.solution_time = 0
+        self.game_mode = game_mode
     
     def end_game(self):
         """Encerra o jogo atual e retorna ao menu."""
@@ -198,14 +217,19 @@ class GameController:
         return False
     
     def _log_algorithm_result(self, success, path_length):
-        """Registra o resultado do algoritmo em um arquivo para análise posterior."""
+        """Registra o resultado do algoritmo em arquivos para análise posterior."""
         import json
         import os
         from datetime import datetime
+        import tracemalloc
         
-        # Determina a heurística utilizada (se aplicável)
+        # Diretórios para resultados
+        results_dir = os.path.join(os.getcwd(), "results")
+        os.makedirs(results_dir, exist_ok=True)
+        
+        # Determina a heurística utilizada
         heuristic_name = "N/A"
-        if self.algorithm == "greedy":
+        if self.algorithm in ["greedy", "astar", "wastar"]:
             heuristic_name = "combined_custom"
         
         # Dados a serem salvos
@@ -213,34 +237,92 @@ class GameController:
             "algorithm": self.algorithm,
             "heuristic": heuristic_name,
             "level": self.game_state.level,
+            "board_size": f"{self.game_state.board.rows}x{self.game_state.board.cols}",
             "success": success,
             "path_length": path_length if success else 0,
             "states_generated": len(self.solution_path) if success else 0,
-            "max_memory_kb": 0,  # Calcularia o uso de memória aqui se tivéssemos essa info
             "execution_time": self.solution_time,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Garante que o diretório de resultados existe
-        results_dir = os.path.join(os.getcwd(), "results")
-        os.makedirs(results_dir, exist_ok=True)
+        # 1. Salva no arquivo JSON para análise computacional
+        json_file = os.path.join(results_dir, "algorithm_results.json")
         
-        # Nome do arquivo de log
-        log_file = os.path.join(results_dir, "algorithm_results.json")
-        
-        # Lê o arquivo existente ou cria um novo
-        if os.path.exists(log_file):
-            with open(log_file, "r") as file:
+        if os.path.exists(json_file):
+            with open(json_file, "r") as file:
                 data = json.load(file)
         else:
             data = []
         
-        # Adiciona o novo resultado
         data.append(result)
         
-        # Escreve de volta no arquivo
-        with open(log_file, "w") as file:
+        with open(json_file, "w") as file:
             json.dump(data, file, indent=4)
+        
+        # 2. Salva um relatório detalhado em texto para leitura humana
+        self._save_detailed_report(result, results_dir)
+        
+        # 3. Se há uma solução, salva a sequência de movimentos
+        if success and self.solution_path:
+            self._save_solution_path(self.solution_path, results_dir)
+
+    def _save_detailed_report(self, result, results_dir):
+        """Salva um relatório detalhado em texto para leitura humana."""
+        import os
+        from datetime import datetime
+        
+        # Cria um nome de arquivo baseado no timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_file = os.path.join(results_dir, f"report_{result['algorithm']}_{result['level']}_{timestamp}.txt")
+        
+        with open(report_file, "w") as file:
+            file.write("==========================================\n")
+            file.write("      RELATÓRIO DE EXECUÇÃO DO ALGORITMO\n")
+            file.write("==========================================\n\n")
+            
+            file.write(f"Data e Hora: {result['timestamp']}\n")
+            file.write(f"Algoritmo: {result['algorithm'].upper()}\n")
+            
+            if result['heuristic'] != "N/A":
+                file.write(f"Heurística: {result['heuristic']}\n")
+                
+            file.write(f"Nível do Jogo: {result['level']}\n")
+            file.write(f"Tamanho do Tabuleiro: {result['board_size']}\n\n")
+            
+            file.write("RESULTADOS:\n")
+            file.write(f"- Sucesso: {'Sim' if result['success'] else 'Não'}\n")
+            
+            if result['success']:
+                file.write(f"- Comprimento do Caminho: {result['path_length']} movimentos\n")
+                file.write(f"- Estados Gerados: {result['states_generated']}\n")
+                
+            file.write(f"- Tempo de Execução: {result['execution_time']:.6f} segundos\n\n")
+            
+            file.write("ESTATÍSTICAS DO JOGO:\n")
+            file.write(f"- Pontuação Final: {self.game_state.score}\n")
+            file.write(f"- Pratos Utilizados: {self.game_state.avl_plates.plates_used}/{self.game_state.avl_plates.total_plate_limit}\n")
+            file.write(f"- Tabuleiro Final: {self.game_state.board.count_occupied_cells()}/{self.game_state.board.rows * self.game_state.board.cols} células\n\n")
+            
+            file.write("==========================================\n")
+            file.write("Fim do Relatório\n")
+
+    def _save_solution_path(self, solution_path, results_dir):
+        """Salva a sequência de movimentos da solução em um arquivo de texto."""
+        import os
+        from datetime import datetime
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        path_file = os.path.join(results_dir, f"solution_{self.algorithm}_{self.game_state.level}_{timestamp}.txt")
+        
+        with open(path_file, "w") as file:
+            file.write(f"SOLUÇÃO DO ALGORITMO {self.algorithm.upper()} - NÍVEL {self.game_state.level}\n")
+            file.write(f"Gerada em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            file.write(f"Comprimento do Caminho: {len(solution_path)} movimentos\n\n")
+            file.write("SEQUÊNCIA DE MOVIMENTOS:\n")
+            
+            for i, move in enumerate(solution_path):
+                x, y, plate_index = move
+                file.write(f"Passo {i+1}: Colocar prato {plate_index} na posição ({x},{y})\n")
     
     def toggle_auto_solve(self):
         """Ativa/desativa a solução automática."""

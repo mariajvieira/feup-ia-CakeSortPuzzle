@@ -192,3 +192,136 @@ class GameState:
         new_state.avl_plates = self.avl_plates.clone()
         
         return new_state
+    
+    @staticmethod
+    def load_from_file(filepath):
+        """Carrega um estado de jogo a partir de um arquivo de texto.
+        
+        Args:
+            filepath (str): Caminho do arquivo a ser carregado.
+            
+        Returns:
+            GameState: Estado de jogo carregado ou None se falhar.
+        """
+        try:
+            with open(filepath, 'r') as file:
+                lines = file.readlines()
+                
+            if len(lines) < 3:
+                print(f"Arquivo inválido: {filepath}")
+                return None
+                
+            # Lê o nível, que deve estar na primeira linha
+            level_line = lines[0].strip()
+            if level_line.startswith("Level:"):
+                level = int(level_line.split(":")[1].strip())
+            else:
+                level = 1
+                
+            # Cria um novo estado de jogo com o nível especificado
+            state = GameState(level)
+            
+            # Lê a estrutura do tabuleiro
+            board_start = -1
+            plates_start = -1
+            
+            for i, line in enumerate(lines):
+                if "Board:" in line:
+                    board_start = i + 1
+                elif "Available Plates:" in line:
+                    plates_start = i + 1
+                    break
+                    
+            if board_start == -1 or plates_start == -1:
+                print(f"Formato de arquivo inválido: {filepath}")
+                return None
+                
+            # Lê o tabuleiro
+            rows = int((plates_start - board_start - 1) / 2)
+            cols = len(lines[board_start].strip().split())
+            
+            # Recria o tabuleiro com o tamanho correto
+            state.board = Board(rows, cols)
+            
+            # Preenche o tabuleiro
+            for r in range(rows):
+                plate_line = lines[board_start + r * 2].strip().split()
+                for c in range(len(plate_line)):
+                    if plate_line[c] != "Empty":
+                        # Decodifica o prato a partir da string
+                        plate = [int(s) if s != "None" else None for s in plate_line[c].split(',')]
+                        state.board.grid[r][c] = plate
+            
+            # Lê os pratos disponíveis
+            avl_plates_str = lines[plates_start].strip().split(';')
+            
+            # Limpa os pratos disponíveis existentes
+            state.avl_plates.visible_plates = []
+            state.avl_plates.plates_queue = []
+            
+            # Adiciona os pratos visíveis (até 3)
+            for i, plate_str in enumerate(avl_plates_str[:state.avl_plates.max_plates]):
+                if plate_str != "Empty":
+                    plate = [int(s) if s != "None" else None for s in plate_str.split(',')]
+                    state.avl_plates.visible_plates.append(plate)
+            
+            # Adiciona o resto dos pratos à fila
+            for plate_str in avl_plates_str[state.avl_plates.max_plates:]:
+                if plate_str != "Empty":
+                    plate = [int(s) if s != "None" else None for s in plate_str.split(',')]
+                    state.avl_plates.plates_queue.append(plate)
+                    
+            # Ajusta o contador de pratos utilizados
+            state.avl_plates.plates_used = state.avl_plates.total_plate_limit - (
+                len(state.avl_plates.visible_plates) + len(state.avl_plates.plates_queue))
+            
+            return state
+        except Exception as e:
+            print(f"Erro ao carregar arquivo: {filepath}")
+            print(e)
+            return None
+    
+    def save_to_file(self, filepath):
+        """Salva o estado atual do jogo em um arquivo de texto.
+        
+        Args:
+            filepath (str): Caminho do arquivo para salvar.
+            
+        Returns:
+            bool: True se salvou com sucesso, False caso contrário.
+        """
+        try:
+            with open(filepath, 'w') as file:
+                # Escreve o nível
+                file.write(f"Level: {self.level}\n\n")
+                
+                # Escreve o tabuleiro
+                file.write("Board:\n")
+                for r in range(self.board.rows):
+                    row_str = []
+                    for c in range(self.board.cols):
+                        if self.board.is_empty(r, c):
+                            row_str.append("Empty")
+                        else:
+                            # Converte o prato para string
+                            plate_str = ','.join(str(s) if s is not None else "None" for s in self.board.grid[r][c])
+                            row_str.append(plate_str)
+                    file.write(' '.join(row_str) + '\n\n')
+                
+                # Escreve os pratos disponíveis
+                file.write("Available Plates:\n")
+                all_plates = self.avl_plates.visible_plates + self.avl_plates.plates_queue
+                
+                plates_str = []
+                for plate in all_plates:
+                    plate_str = ','.join(str(s) if s is not None else "None" for s in plate)
+                    plates_str.append(plate_str)
+                
+                file.write(';'.join(plates_str))
+                file.write('\n')
+                
+            return True
+        except Exception as e:
+            print(f"Erro ao salvar arquivo: {filepath}")
+            print(e)
+            return False
