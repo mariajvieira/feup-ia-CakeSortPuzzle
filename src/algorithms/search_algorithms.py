@@ -284,7 +284,7 @@ def astar(initial_state, heuristic_func=combined_custom_heuristic):
     return False, None
 
 
-def weighted_astar(initial_state, weight=1.5, heuristic_func=combined_custom_heuristic):
+def weighted_astar(initial_state, weight=2.0, heuristic_func=combined_custom_heuristic):
     initial_node = Node(initial_state)
     
     if is_goal(initial_node):

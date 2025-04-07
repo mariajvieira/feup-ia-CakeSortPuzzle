@@ -101,8 +101,7 @@ def estimated_moves_heuristic(node):
 
 
 def combined_custom_heuristic(node):
-    # Pesos para cada heurística
-    w1, w2, w3, w4 = 1.0, 2.0, 1.5, 3.0
+    w1, w2, w3, w4 = 0.0, 0.0, 0.0, 1.0
     
     h1 = free_slots_heuristic(node)
     h2 = missing_slices_heuristic(node)

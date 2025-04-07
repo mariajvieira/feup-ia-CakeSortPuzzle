@@ -1,0 +1,22 @@
+==========================================
+      RELATÓRIO DE EXECUÇÃO DO ALGORITMO
+==========================================
+
+Data e Hora: 2025-04-07 20:00:36
+Algoritmo: WASTAR
+Heurística: combined_custom
+Tamanho do Tabuleiro: 2x2
+
+RESULTADOS:
+- Sucesso: Sim
+- Comprimento do Caminho: 6 movimentos
+- Estados Gerados: 6
+- Tempo de Execução: 0.009057 segundos
+
+ESTATÍSTICAS DO JOGO:
+- Total de bolos concluídos: 0
+- Pratos Utilizados: 0/6
+- Tabuleiro Final: 0/4 células
+
+==========================================
+Fim do Relatório

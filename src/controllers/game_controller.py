@@ -47,7 +47,7 @@ class GameController:
         self.auto_solve_timer = 0
         self.solution_time = 0  # Tempo que o algoritmo levou para encontrar a solução
     
-    def start_game(self, level=1, algorithm='bfs', game_mode='ai', board_rows=3, board_cols=3, plate_count=5):
+    def start_game(self, level=1, algorithm='bfs', game_mode='ai', board_rows=2, board_cols=2, plate_count=6):
         """Inicia um novo jogo.
         
         Args:
@@ -295,8 +295,8 @@ class GameController:
             if result['heuristic'] != "N/A":
                 file.write(f"Heurística: {result['heuristic']}\n")
                 
-            file.write(f"Nível do Jogo: {result['level']}\n")
             file.write(f"Tamanho do Tabuleiro: {result['board_size']}\n\n")
+
             
             file.write("RESULTADOS:\n")
             file.write(f"- Sucesso: {'Sim' if result['success'] else 'Não'}\n")

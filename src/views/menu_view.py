@@ -49,9 +49,9 @@ class MenuView:
         self.selected_game_mode = 'ai'
         
         # Configurações personalizáveis do tabuleiro
-        self.board_rows = 3
-        self.board_cols = 3
-        self.plate_count = 5
+        self.board_rows = 2
+        self.board_cols = 2
+        self.plate_count = 6
         
         self._init_buttons()
         
