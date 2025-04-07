@@ -210,7 +210,7 @@ class GameView:
         self.screen.blit(level_text, level_rect)
         
         score_text = self.fonts['medium'].render(
-            f"Pontuação: {self.game_state.score}",
+            f"Bolos concluídos: {self.game_state.score}",
             True, self.colors['text'])
         score_rect = score_text.get_rect(left=10, top=level_rect.bottom + 5)
         self.screen.blit(score_text, score_rect)
@@ -276,7 +276,7 @@ class GameView:
         text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 - 20))
         self.screen.blit(text, text_rect)
         
-        score_text = self.fonts['large'].render(f"Pontuação: {self.game_state.score}", True, (255, 182, 193))
+        score_text = self.fonts['large'].render(f"Bolos concluídos: {self.game_state.score}", True, (255, 182, 193))
         score_rect = score_text.get_rect(center=(self.screen.get_width() // 2, text_rect.bottom + 30))
         self.screen.blit(score_text, score_rect)
         

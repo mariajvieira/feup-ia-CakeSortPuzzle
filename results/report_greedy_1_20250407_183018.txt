@@ -1,0 +1,23 @@
+==========================================
+      RELATÓRIO DE EXECUÇÃO DO ALGORITMO
+==========================================
+
+Data e Hora: 2025-04-07 18:30:18
+Algoritmo: GREEDY
+Heurística: combined_custom
+Nível do Jogo: 1
+Tamanho do Tabuleiro: 3x3
+
+RESULTADOS:
+- Sucesso: Sim
+- Comprimento do Caminho: 5 movimentos
+- Estados Gerados: 5
+- Tempo de Execução: 0.029722 segundos
+
+ESTATÍSTICAS DO JOGO:
+- Total de bolos concluídos: 0
+- Pratos Utilizados: 0/5
+- Tabuleiro Final: 0/9 células
+
+==========================================
+Fim do Relatório

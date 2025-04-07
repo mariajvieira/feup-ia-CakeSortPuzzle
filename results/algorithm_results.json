@@ -636,5 +636,60 @@
         "states_generated": 8,
         "execution_time": 0.1065833568572998,
         "timestamp": "2025-04-07 03:42:29"
+    },
+    {
+        "algorithm": "ids",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 27.07972240447998,
+        "timestamp": "2025-04-07 18:15:05"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "3x2",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.014150619506835938,
+        "timestamp": "2025-04-07 18:15:16"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.03426814079284668,
+        "timestamp": "2025-04-07 18:18:08"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.036492347717285156,
+        "timestamp": "2025-04-07 18:26:18"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.029722213745117188,
+        "timestamp": "2025-04-07 18:30:18"
     }
 ]

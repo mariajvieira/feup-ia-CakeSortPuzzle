@@ -308,7 +308,7 @@ class GameController:
             file.write(f"- Tempo de Execução: {result['execution_time']:.6f} segundos\n\n")
             
             file.write("ESTATÍSTICAS DO JOGO:\n")
-            file.write(f"- Pontuação Final: {self.game_state.score}\n")
+            file.write(f"- Total de bolos concluídos: {self.game_state.score}\n")
             file.write(f"- Pratos Utilizados: {self.game_state.avl_plates.plates_used}/{self.game_state.avl_plates.total_plate_limit}\n")
             file.write(f"- Tabuleiro Final: {self.game_state.board.count_occupied_cells()}/{self.game_state.board.rows * self.game_state.board.cols} células\n\n")
             
