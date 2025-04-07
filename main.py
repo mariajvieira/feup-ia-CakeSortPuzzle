@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-Cake Sorting Puzzle - Jogo de puzzle onde o objetivo é organizar fatias de bolo
-para formar bolos completos.
-
-Desenvolvido como parte do projeto de Inteligência Artificial.
-"""
 
 import pygame
 import sys
@@ -15,37 +7,29 @@ from src.views.menu_view import MenuView
 
 
 def main():
-    """Função principal que inicializa o jogo."""
-    # Inicializa o pygame
     pygame.init()
     pygame.display.set_caption("Cake Sorting Puzzle")
     
-    # Configurações da tela
     info = pygame.display.Info()
     screen_width = info.current_w
     screen_height = info.current_h
     screen = pygame.display.set_mode((screen_width, screen_height),pygame.FULLSCREEN)
     
-    # Inicializa o controlador do jogo
     game_controller = GameController(screen)
     
-    # Inicializa o menu
     menu_view = MenuView(screen, game_controller)
     
-    # Loop principal
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             
-            # Passa os eventos para o controlador atual
             if game_controller.is_in_game():
                 game_controller.handle_event(event)
             else:
                 menu_view.handle_event(event)
         
-        # Atualiza e renderiza
         if game_controller.is_in_game():
             game_controller.update()
             game_controller.render()
