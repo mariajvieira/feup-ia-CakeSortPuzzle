@@ -166,10 +166,10 @@ class MenuView:
         
         # Botões de algoritmo com bom espaçamento
         algorithm_buttons = {}
-        algorithms = ['bfs', 'dfs', 'ids', 'ucs']
-        alg_width = int(self.screen_width * 0.08)
-        alg_spacing = int(self.screen_width * 0.1)
-        alg_start_x = center_x - ((4 * alg_width + 3 * (alg_spacing - alg_width)) // 2)
+        algorithms = ['bfs', 'dfs', 'ids', 'ucs', 'greedy', 'astar', 'wastar']  # Adicionado 'wastar'
+        alg_width = int(self.screen_width * 0.06)  # Reduzido para acomodar mais botões
+        alg_spacing = int(self.screen_width * 0.08)  # Ajustado espaçamento
+        alg_start_x = center_x - ((7 * alg_width + 6 * (alg_spacing - alg_width)) // 2)  # Ajustado para 7 algoritmos
         alg_y = level_y + button_height + button_spacing  # Posicionado abaixo dos níveis
         
         for i, alg in enumerate(algorithms):

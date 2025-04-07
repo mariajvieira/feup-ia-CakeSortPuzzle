@@ -203,10 +203,15 @@ class GameController:
         import os
         from datetime import datetime
         
+        # Determina a heurística utilizada (se aplicável)
+        heuristic_name = "N/A"
+        if self.algorithm == "greedy":
+            heuristic_name = "combined_custom"
+        
         # Dados a serem salvos
         result = {
             "algorithm": self.algorithm,
-            "heuristic": "N/A",
+            "heuristic": heuristic_name,
             "level": self.game_state.level,
             "success": success,
             "path_length": path_length if success else 0,

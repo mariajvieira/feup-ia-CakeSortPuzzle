@@ -30,96 +30,109 @@ def free_slots_heuristic(node):
 
 
 def missing_slices_heuristic(node):
-    """Heurística baseada no número de fatias faltantes para completar os bolos.
-    
-    Calcula o número total de cada tipo de fatia necessária para completar todos os bolos no tabuleiro.
-    Um valor menor sugere uma configuração de tabuleiro melhor.
+    """Heurística baseada no número de fatias necessárias para completar bolos.
     
     Args:
         node (Node): Nó atual.
         
     Returns:
-        int: Valor da heurística (número de fatias faltantes).
+        float: Valor da heurística (menor é melhor).
     """
-    board = node.state.board
-    avl_plates = node.state.avl_plates
+    state = node.state
+    board = state.board
+    avl_plates = state.avl_plates
     
-    # Conta as fatias de cada tipo no tabuleiro e nos pratos disponíveis
+    # Conta o número total de fatias de cada tipo no tabuleiro
     slice_counts = {}
-    
-    # Conta as fatias no tabuleiro
-    for i in range(board.rows):
-        for j in range(board.cols):
-            if not board.is_empty(i, j):
-                plate = board.grid[i][j]
-                for slice_type in plate:
+    for x in range(board.rows):
+        for y in range(board.cols):
+            if not board.is_empty(x, y):
+                for slice_type in board.grid[x][y]:
                     if slice_type is not None:
-                        if slice_type not in slice_counts:
-                            slice_counts[slice_type] = 0
-                        slice_counts[slice_type] += 1
+                        slice_counts[slice_type] = slice_counts.get(slice_type, 0) + 1
     
     # Conta as fatias nos pratos disponíveis
-    for plate in avl_plates.plates:
+    # MODIFICADO: Conta em visible_plates e plates_queue
+    for plate in avl_plates.visible_plates + avl_plates.plates_queue:
         for slice_type in plate:
             if slice_type is not None:
-                if slice_type not in slice_counts:
-                    slice_counts[slice_type] = 0
-                slice_counts[slice_type] += 1
+                slice_counts[slice_type] = slice_counts.get(slice_type, 0) + 1
     
-    # Calcula quantas fatias faltam para completar cada tipo de bolo
-    # Um bolo completo tem 8 fatias do mesmo tipo
+    # Calcula quantas fatias estão faltando para completar bolos
     missing_slices = 0
     for slice_type, count in slice_counts.items():
-        if count < 8:  # Se não tiver 8 fatias, está incompleto
-            missing_slices += (8 - count)
+        complete_cakes = count // 8  # Cada bolo tem 8 fatias
+        remaining = count % 8
+        if remaining > 0:
+            missing_slices += (8 - remaining)  # Fatias necessárias para completar
     
     return missing_slices
 
 
 def clustered_slices_heuristic(node):
-    """Heurística baseada no agrupamento de fatias similares.
-    
-    Avalia o quão bem as fatias do mesmo bolo estão agrupadas - ou seja, se as fatias do mesmo bolo
-    estão no mesmo prato ou em pratos próximos uns dos outros.
-    Uma pontuação de agrupamento mais alta significa que serão necessários menos movimentos para completar os bolos.
+    """Heurística baseada no agrupamento de fatias do mesmo tipo.
     
     Args:
         node (Node): Nó atual.
         
     Returns:
-        int: Valor da heurística (inversamente proporcional ao agrupamento).
+        float: Valor da heurística (menor é melhor).
     """
-    board = node.state.board
+    state = node.state
+    board = state.board
+    avl_plates = state.avl_plates
     
     # Mapeia cada tipo de fatia para suas posições no tabuleiro
     slice_positions = {}
     
-    # Coleta as posições de todas as fatias no tabuleiro
-    for i in range(board.rows):
-        for j in range(board.cols):
-            if not board.is_empty(i, j):
-                plate = board.grid[i][j]
-                for slice_type in plate:
+    # Verifica o tabuleiro
+    for x in range(board.rows):
+        for y in range(board.cols):
+            if not board.is_empty(x, y):
+                for i, slice_type in enumerate(board.grid[x][y]):
                     if slice_type is not None:
                         if slice_type not in slice_positions:
                             slice_positions[slice_type] = []
-                        slice_positions[slice_type].append((i, j))
+                        slice_positions[slice_type].append((x, y, i))
+    
+    # Verifica os pratos disponíveis
+    # MODIFICADO: Usa visible_plates em vez de plates
+    for p_idx, plate in enumerate(avl_plates.visible_plates):
+        for i, slice_type in enumerate(plate):
+            if slice_type is not None:
+                if slice_type not in slice_positions:
+                    slice_positions[slice_type] = []
+                # Posição especial para os pratos disponíveis
+                slice_positions[slice_type].append((-1, p_idx, i))
+    
+    # ADICIONADO: Verifica também plates_queue
+    for p_idx, plate in enumerate(avl_plates.plates_queue):
+        for i, slice_type in enumerate(plate):
+            if slice_type is not None:
+                if slice_type not in slice_positions:
+                    slice_positions[slice_type] = []
+                # Posição especial para os pratos na fila
+                slice_positions[slice_type].append((-2, p_idx, i))
     
     # Calcula a dispersão das fatias de cada tipo
-    # Menor dispersão = melhor agrupamento
     total_dispersion = 0
     for slice_type, positions in slice_positions.items():
+        # Ignora se há apenas uma fatia deste tipo
         if len(positions) <= 1:
-            continue  # Não há dispersão com apenas uma fatia
+            continue
         
-        # Calcula a distância Manhattan entre todas as fatias do mesmo tipo
+        # Calcula a dispersão como a soma das distâncias Manhattan entre todas as fatias
         dispersion = 0
         for i in range(len(positions)):
-            for j in range(i+1, len(positions)):
-                r1, c1 = positions[i]
-                r2, c2 = positions[j]
-                manhattan_dist = abs(r1 - r2) + abs(c1 - c2)
-                dispersion += manhattan_dist
+            for j in range(i + 1, len(positions)):
+                x1, y1, _ = positions[i]
+                x2, y2, _ = positions[j]
+                
+                # Se uma das fatias está em um prato disponível, use uma distância fixa maior
+                if x1 < 0 or x2 < 0:
+                    dispersion += 5
+                else:
+                    dispersion += abs(x1 - x2) + abs(y1 - y2)
         
         total_dispersion += dispersion
     
@@ -127,31 +140,24 @@ def clustered_slices_heuristic(node):
 
 
 def estimated_moves_heuristic(node):
-    """Heurística baseada no número estimado de movimentos para finalizar o nível.
-    
-    Avalia o número mínimo de movimentos necessários para atingir a pontuação alvo
-    com base nas colocações atuais e nos pratos disponíveis.
-    Um valor menor indica um estado mais otimizado.
+    """Heurística baseada no número estimado de movimentos para completar o jogo.
     
     Args:
         node (Node): Nó atual.
         
     Returns:
-        int: Valor da heurística (número estimado de movimentos).
+        float: Valor da heurística (menor é melhor).
     """
-    # Distância até a pontuação alvo
-    score_distance = node.state.target_score - node.state.score
+    state = node.state
+    avl_plates = state.avl_plates
     
-    # Cada bolo completo vale 1 ponto, então precisamos de score_distance bolos completos
-    # Estimamos que cada movimento de prato contribui para no máximo 1/4 de um bolo completo
-    # (assumindo que precisamos de pelo menos 4 movimentos para completar um bolo)
-    estimated_moves = score_distance * 4
+    # Estima o número de pratos restantes para colocar
+    # MODIFICADO: Usa visible_plates e plates_queue
+    remaining_plates = len(avl_plates.visible_plates) + len(avl_plates.plates_queue)
     
-    # Ajusta com base no número de pratos disponíveis
-    # Quanto mais pratos disponíveis, mais movimentos podem ser necessários
-    estimated_moves += len(node.state.avl_plates.plates)
-    
-    return estimated_moves
+    # Cada prato colocado é um movimento, então o número mínimo de movimentos
+    # restantes é igual ao número de pratos restantes
+    return remaining_plates
 
 
 def combined_custom_heuristic(node):

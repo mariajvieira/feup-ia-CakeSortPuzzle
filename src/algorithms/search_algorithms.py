@@ -2,12 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """
-Módulo de algoritmos de busca - Implementa os algoritmos BFS, DFS, IDS e UCS
+Módulo de algoritmos de busca - Implementa os algoritmos BFS, DFS, IDS, UCS, Greedy Search e A* (A-Star)
 para resolver o puzzle de ordenação de bolos.
 """
 
 import heapq
 from collections import deque
+from src.algorithms.heuristics import (
+    free_slots_heuristic,
+    missing_slices_heuristic,
+    clustered_slices_heuristic,
+    estimated_moves_heuristic,
+    combined_custom_heuristic
+)
 
 
 class Node:
@@ -342,13 +349,213 @@ def ucs(initial_state):
     return False, None
 
 
+def greedy_search(initial_state, heuristic_func=combined_custom_heuristic):
+    """Implementa o algoritmo de busca gulosa (Greedy Search).
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        heuristic_func (function): Função heurística a ser utilizada.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa a pilha de prioridade (ordenada pela heurística) e o conjunto de estados visitados
+    # Usamos uma tupla (valor_heurística, contador, nó) para garantir ordenação estável
+    import itertools
+    counter = itertools.count()  # Contador único para desempate quando heurísticas são iguais
+    
+    # Para greedy search, queremos minimizar o valor da heurística
+    # (menor valor = estado mais promissor)
+    priority_queue = [(heuristic_func(initial_node), next(counter), initial_node)]
+    visited = set()
+    
+    while priority_queue:
+        # Remove o nó com menor valor de heurística
+        _, _, node = heapq.heappop(priority_queue)
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Verifica se este é um estado objetivo
+        if is_goal(node):
+            return True, get_solution_path(node)
+        
+        # Gera os sucessores
+        successors = get_successors(node)
+        
+        # Adiciona cada sucessor à fila de prioridade com base na heurística
+        for successor in successors:
+            # Calcula o valor da heurística para este sucessor
+            h_value = heuristic_func(successor)
+            
+            # Adiciona à fila de prioridade
+            heapq.heappush(priority_queue, (h_value, next(counter), successor))
+    
+    # Não encontrou solução
+    return False, None
+
+
+def astar(initial_state, heuristic_func=combined_custom_heuristic):
+    """Implementa o algoritmo A* (A-Star).
+    
+    Combina busca de custo uniforme (UCS) com busca gulosa, usando a função:
+    f(n) = g(n) + h(n)
+    onde g(n) é o custo acumulado do caminho e h(n) é o valor da heurística.
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        heuristic_func (function): Função heurística a ser utilizada.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa contadores para ordenação estável
+    import itertools
+    counter = itertools.count()
+    
+    # Inicializa a fila de prioridade e o conjunto de estados visitados
+    # Cada item na fila é uma tupla: (f(n), contador, nó)
+    # f(n) = g(n) + h(n) = custo acumulado + heurística
+    priority_queue = [(initial_node.cost + heuristic_func(initial_node), next(counter), initial_node)]
+    
+    # Conjunto para rastrear estados visitados
+    visited = set()
+    
+    # Contador de nós explorados para estatísticas
+    nodes_explored = 0
+    
+    while priority_queue:
+        # Remove o nó com menor valor de f(n) da fila
+        _, _, node = heapq.heappop(priority_queue)
+        nodes_explored += 1
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Verifica se este é um estado objetivo
+        if is_goal(node):
+            print(f"A*: Solução encontrada após explorar {nodes_explored} nós")
+            return True, get_solution_path(node)
+        
+        # Gera os sucessores
+        for successor in get_successors(node):
+            # Calcula f(n) = g(n) + h(n) para este sucessor
+            f_value = successor.cost + heuristic_func(successor)
+            
+            # Adiciona à fila de prioridade
+            heapq.heappush(priority_queue, (f_value, next(counter), successor))
+    
+    # Não encontrou solução
+    return False, None
+
+
+def weighted_astar(initial_state, weight=1.5, heuristic_func=combined_custom_heuristic):
+    """Implementa o algoritmo Weighted A* (A-Star ponderado).
+    
+    Usa a função: f(n) = g(n) + w * h(n)
+    onde g(n) é o custo acumulado do caminho, h(n) é o valor da heurística,
+    e w é o peso que controla o equilíbrio entre custo e heurística.
+    
+    Args:
+        initial_state (GameState): Estado inicial do jogo.
+        weight (float): Peso da heurística (valores maiores favorecem a velocidade).
+        heuristic_func (function): Função heurística a ser utilizada.
+        
+    Returns:
+        tuple: (bool, list) - Sucesso e caminho da solução ou None.
+    """
+    # Cria o nó inicial
+    initial_node = Node(initial_state)
+    
+    # Verifica se o estado inicial já é um objetivo
+    if is_goal(initial_node):
+        return True, []
+    
+    # Inicializa contadores para ordenação estável
+    import itertools
+    counter = itertools.count()
+    
+    # Inicializa a fila de prioridade e o conjunto de estados visitados
+    # Cada item na fila é uma tupla: (f(n), contador, nó)
+    # f(n) = g(n) + w * h(n) = custo acumulado + (peso * heurística)
+    priority_queue = [(initial_node.cost + weight * heuristic_func(initial_node), next(counter), initial_node)]
+    
+    # Conjunto para rastrear estados visitados
+    visited = set()
+    
+    # Contador de nós explorados para estatísticas
+    nodes_explored = 0
+    
+    while priority_queue:
+        # Remove o nó com menor valor de f(n) da fila
+        _, _, node = heapq.heappop(priority_queue)
+        nodes_explored += 1
+        
+        # Obtém uma representação hashable do estado
+        state_repr = str(node.state.get_state_representation())
+        
+        # Verifica se o estado já foi visitado
+        if state_repr in visited:
+            continue
+        
+        # Marca o estado como visitado
+        visited.add(state_repr)
+        
+        # Verifica se este é um estado objetivo
+        if is_goal(node):
+            print(f"Weighted A* (w={weight}): Solução encontrada após explorar {nodes_explored} nós")
+            return True, get_solution_path(node)
+        
+        # Gera os sucessores
+        for successor in get_successors(node):
+            # Calcula f(n) = g(n) + w * h(n) para este sucessor
+            f_value = successor.cost + weight * heuristic_func(successor)
+            
+            # Adiciona à fila de prioridade
+            heapq.heappush(priority_queue, (f_value, next(counter), successor))
+    
+    # Não encontrou solução
+    return False, None
+
+
 def get_algorithm(algorithm_name):
     """Retorna a função de algoritmo correspondente ao nome."""
     algorithms = {
         'bfs': bfs,
         'dfs': lambda state: dfs(state, depth_limit=state.avl_plates.total_plate_limit * 3),
         'ids': lambda state: ids(state, max_depth=state.avl_plates.total_plate_limit * 2),
-        'ucs': ucs
+        'ucs': ucs,
+        'greedy': lambda state: greedy_search(state, heuristic_func=combined_custom_heuristic),
+        'astar': lambda state: astar(state, heuristic_func=combined_custom_heuristic),
+        'wastar': lambda state: weighted_astar(state, weight=1.5, heuristic_func=combined_custom_heuristic)
     }
     
     return algorithms.get(algorithm_name.lower())
