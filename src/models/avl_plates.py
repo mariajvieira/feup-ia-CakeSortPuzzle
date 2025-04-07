@@ -10,29 +10,13 @@ import copy
 
 
 class AvailablePlates:
-    """Classe que representa os pratos disponíveis para o jogador.
-    
-    Attributes:
-        plates (list): Lista de pratos disponíveis.
-        visible_plates (list): Lista de pratos visíveis para o jogador (no máximo 3).
-        max_plates (int): Número máximo de pratos visíveis simultaneamente.
-        slice_types (list): Tipos de fatias disponíveis no jogo.
-        plates_used (int): Número de pratos já utilizados pelo jogador.
-        total_plate_limit (int): Limite total de pratos disponíveis no jogo.
-        plates_queue (list): Fila de pratos que serão disponibilizados.
-    """
     
     def __init__(self, level=1):
-        """Inicializa os pratos disponíveis.
-        
-        Args:
-            level (int): Nível do jogo, que influencia a complexidade dos pratos.
-        """
-        self.max_plates = 3  # Número máximo de pratos visíveis simultaneamente
+        self.max_plates = 3 
         
         # Define o limite total de pratos com base no nível
         if level == 1:
-            self.total_plate_limit = 5  # Nível 1: 12 pratos (atualizado de 4)
+            self.total_plate_limit = 5  # Nível 1: 12 pratos
         else:
             self.total_plate_limit = 18  # Outros níveis: 18 pratos
             

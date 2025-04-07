@@ -266,7 +266,7 @@ class GameView:
             if len(self.animations['particles']) < 100 and self.animations['active']:
                 self._add_celebration_particles()
         else:
-            message = "Perdeu :/ , fim do jogo"
+            message = "Perdeu :( , fim do jogo"
         
         pulse = 1.0 + 0.1 * math.sin(pygame.time.get_ticks() * 0.005)
         font_size = int(36 * pulse)
