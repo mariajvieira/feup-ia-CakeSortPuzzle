@@ -504,5 +504,38 @@
         "max_memory_kb": 0,
         "execution_time": 0.12997007369995117,
         "timestamp": "2025-04-07 01:13:56"
+    },
+    {
+        "algorithm": "wastar",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "2x2",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.008694171905517578,
+        "timestamp": "2025-04-07 01:29:43"
+    },
+    {
+        "algorithm": "wastar",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "2x2",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.008796215057373047,
+        "timestamp": "2025-04-07 01:30:47"
+    },
+    {
+        "algorithm": "astar",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "2x2",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.009202957153320312,
+        "timestamp": "2025-04-07 01:37:04"
     }
 ]

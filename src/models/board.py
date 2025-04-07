@@ -342,3 +342,16 @@ class Board:
         new_board = Board(self.rows, self.cols)
         new_board.grid = copy.deepcopy(self.grid)
         return new_board
+    
+    def count_occupied_cells(self):
+        """Conta o número de células ocupadas no tabuleiro.
+        
+        Returns:
+            int: Número de células ocupadas (que contêm um prato).
+        """
+        count = 0
+        for x in range(self.rows):
+            for y in range(self.cols):
+                if not self.is_empty(x, y):
+                    count += 1
+        return count

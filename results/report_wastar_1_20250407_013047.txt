@@ -1,0 +1,19 @@
+==========================================
+      RELATÓRIO DE EXECUÇÃO DO ALGORITMO
+==========================================
+
+Data e Hora: 2025-04-07 01:30:47
+Algoritmo: WASTAR
+Heurística: combined_custom
+Nível do Jogo: 1
+Tamanho do Tabuleiro: 2x2
+
+RESULTADOS:
+- Sucesso: Sim
+- Comprimento do Caminho: 5 movimentos
+- Estados Gerados: 5
+- Tempo de Execução: 0.008796 segundos
+
+ESTATÍSTICAS DO JOGO:
+- Pontuação Final: 0
+- Pratos Utilizados: 0/5
