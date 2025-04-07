@@ -537,5 +537,16 @@
         "states_generated": 5,
         "execution_time": 0.009202957153320312,
         "timestamp": "2025-04-07 01:37:04"
+    },
+    {
+        "algorithm": "bfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "2x2",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.5837209224700928,
+        "timestamp": "2025-04-07 02:12:47"
     }
 ]
