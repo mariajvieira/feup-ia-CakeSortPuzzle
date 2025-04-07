@@ -1,0 +1,11 @@
+SOLUÇÃO DO ALGORITMO WASTAR - NÍVEL 1
+Gerada em: 2025-04-07 22:08:45
+Comprimento do Caminho: 6 movimentos
+
+SEQUÊNCIA DE MOVIMENTOS:
+Passo 1: Colocar prato 1 na posição (0,0)
+Passo 2: Colocar prato 1 na posição (0,1)
+Passo 3: Colocar prato 2 na posição (1,0)
+Passo 4: Colocar prato 2 na posição (1,0)
+Passo 5: Colocar prato 0 na posição (1,1)
+Passo 6: Colocar prato 0 na posição (1,1)
