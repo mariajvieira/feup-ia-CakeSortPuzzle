@@ -11,14 +11,16 @@ import copy
 
 class AvailablePlates:
     
-    def __init__(self, level=1):
+    def __init__(self, level=1, plate_count=None):
         self.max_plates = 3 
         
-        # Define o limite total de pratos com base no nível
-        if level == 1:
-            self.total_plate_limit = 5  # Nível 1: 12 pratos
+        # Define o limite total de pratos com base no nível ou no parâmetro fornecido
+        if plate_count is not None:
+            self.total_plate_limit = plate_count
+        elif level == 1:
+            self.total_plate_limit = 5  # Nível 1: 5 pratos por padrão
         else:
-            self.total_plate_limit = 18  # Outros níveis: 18 pratos
+            self.total_plate_limit = 18  # Outros níveis: 18 pratos por padrão
             
         self.plates_used = 0  # Contador de pratos já utilizados
         

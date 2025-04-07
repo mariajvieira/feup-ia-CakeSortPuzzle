@@ -47,9 +47,18 @@ class GameController:
         self.auto_solve_timer = 0
         self.solution_time = 0  # Tempo que o algoritmo levou para encontrar a solução
     
-    def start_game(self, level=1, algorithm='bfs', game_mode='ai'):
-        """Inicia um novo jogo."""
-        self.game_state = GameState(level)
+    def start_game(self, level=1, algorithm='bfs', game_mode='ai', board_rows=3, board_cols=3, plate_count=5):
+        """Inicia um novo jogo.
+        
+        Args:
+            level (int): Nível do jogo.
+            algorithm (str): Algoritmo de busca a ser utilizado.
+            game_mode (str): Modo de jogo ('ai' ou 'human').
+            board_rows (int): Número de linhas do tabuleiro.
+            board_cols (int): Número de colunas do tabuleiro.
+            plate_count (int): Quantidade de bolos disponíveis.
+        """
+        self.game_state = GameState(level, board_rows=board_rows, board_cols=board_cols, plate_count=plate_count)
         self.game_view = GameView(self.screen, self.game_state, self)  # Passa a referência para o controlador
         self.in_game = True
         self.selected_plate = -1

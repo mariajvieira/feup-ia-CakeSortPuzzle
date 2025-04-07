@@ -23,11 +23,14 @@ class GameState:
         win (bool): Indica se o jogador venceu.
     """
     
-    def __init__(self, level=1):
+    def __init__(self, level=1, board_rows=None, board_cols=None, plate_count=None):
         """Inicializa um novo estado de jogo.
         
         Args:
             level (int): Nível inicial do jogo.
+            board_rows (int, optional): Número de linhas do tabuleiro. Se None, usa o padrão do nível.
+            board_cols (int, optional): Número de colunas do tabuleiro. Se None, usa o padrão do nível.
+            plate_count (int, optional): Quantidade de bolos disponíveis. Se None, usa o padrão do nível.
         """
         self.level = level
         self.score = 0
@@ -35,12 +38,17 @@ class GameState:
         self.game_over = False
         self.win = False
         
-        # Define o tamanho do tabuleiro com base no nível
-        board_size = self._get_board_size(level)
+        # Define o tamanho do tabuleiro com base no nível ou nos parâmetros fornecidos
+        if board_rows is None or board_cols is None:
+            board_size = self._get_board_size(level)
+            board_rows = board_rows or board_size[0]
+            board_cols = board_cols or board_size[1]
         
-        # Inicializa o tabuleiro e os pratos disponíveis
-        self.board = Board(board_size[0], board_size[1])
-        self.avl_plates = AvailablePlates(level)
+        # Inicializa o tabuleiro com o tamanho especificado
+        self.board = Board(board_rows, board_cols)
+        
+        # Inicializa os pratos disponíveis com a quantidade especificada
+        self.avl_plates = AvailablePlates(level, plate_count)
         
         # Não há pontuação alvo, apenas pontuação acumulada pelos bolos completados
         self.target_score = None  # Removemos o conceito de pontuação alvo
@@ -182,7 +190,8 @@ class GameState:
         Returns:
             GameState: Uma nova instância de GameState com os mesmos valores.
         """
-        new_state = GameState(self.level)
+        # Cria um novo estado com os mesmos parâmetros de tabuleiro e quantidade de bolos
+        new_state = GameState(self.level, board_rows=self.board.rows, board_cols=self.board.cols, plate_count=self.avl_plates.total_plate_limit)
         new_state.score = self.score
         new_state.moves = self.moves
         new_state.game_over = self.game_over
