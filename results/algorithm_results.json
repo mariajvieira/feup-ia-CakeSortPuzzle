@@ -581,5 +581,60 @@
         "states_generated": 5,
         "execution_time": 0.01648259162902832,
         "timestamp": "2025-04-07 03:00:11"
+    },
+    {
+        "algorithm": "bfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 2,
+        "states_generated": 2,
+        "execution_time": 0.026675939559936523,
+        "timestamp": "2025-04-07 03:40:49"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "3x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.023095130920410156,
+        "timestamp": "2025-04-07 03:41:25"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "5x3",
+        "success": true,
+        "path_length": 5,
+        "states_generated": 5,
+        "execution_time": 0.03407001495361328,
+        "timestamp": "2025-04-07 03:41:35"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "5x3",
+        "success": true,
+        "path_length": 8,
+        "states_generated": 8,
+        "execution_time": 0.07602453231811523,
+        "timestamp": "2025-04-07 03:42:19"
+    },
+    {
+        "algorithm": "dfs",
+        "heuristic": "N/A",
+        "level": 1,
+        "board_size": "5x3",
+        "success": true,
+        "path_length": 8,
+        "states_generated": 8,
+        "execution_time": 0.1065833568572998,
+        "timestamp": "2025-04-07 03:42:29"
     }
 ]

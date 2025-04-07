@@ -146,43 +146,52 @@ class MenuView:
             x = mode_start_x + i * mode_spacing - mode_width // 2
             game_mode_buttons[mode] = pygame.Rect(x, mode_y, mode_width, button_height)
         
-        # Adiciona controles para tamanho do tabuleiro e quantidade de bolos
-        slider_width = int(self.screen_width * 0.3)
-        slider_height = int(button_height * 0.6)
-        slider_y = mode_y + button_height + button_spacing
+        # Adiciona controles para tamanho do tabuleiro e quantidade de bolos na lateral direita
+        config_width = int(self.screen_width * 0.15)  # Largura da área de configuração reduzida
+        config_x = self.screen_width - config_width - 20  # Posição X da área de configuração
+        config_y = mode_y + button_height + button_spacing
         
-        # Sliders para linhas, colunas e quantidade de bolos
-        rows_slider = pygame.Rect(center_x - slider_width // 2, slider_y, slider_width, slider_height)
-        cols_slider = pygame.Rect(center_x - slider_width // 2, slider_y + button_height, slider_width, slider_height)
-        plates_slider = pygame.Rect(center_x - slider_width // 2, slider_y + 2 * button_height, slider_width, slider_height)
+        # Altura dos controles numéricos
+        control_height = int(button_height * 0.8)
+        control_spacing = int(button_height * 1.2)
         
         # Botões para aumentar/diminuir valores
-        button_small = int(button_height * 0.8)
+        button_small = int(button_height * 0.7)
         
-        # Botões para linhas
-        rows_minus = pygame.Rect(rows_slider.left - button_small - 10, rows_slider.centery - button_small // 2, button_small, button_small)
-        rows_plus = pygame.Rect(rows_slider.right + 10, rows_slider.centery - button_small // 2, button_small, button_small)
+        # Controles para linhas
+        rows_value_rect = pygame.Rect(config_x + config_width//2 - button_small, config_y, button_small*2, control_height)
+        rows_minus = pygame.Rect(config_x, config_y, button_small, button_small)
+        rows_plus = pygame.Rect(config_x + config_width - button_small, config_y, button_small, button_small)
         
-        # Botões para colunas
-        cols_minus = pygame.Rect(cols_slider.left - button_small - 10, cols_slider.centery - button_small // 2, button_small, button_small)
-        cols_plus = pygame.Rect(cols_slider.right + 10, cols_slider.centery - button_small // 2, button_small, button_small)
+        # Controles para colunas
+        cols_value_rect = pygame.Rect(config_x + config_width//2 - button_small, config_y + control_spacing, button_small*2, control_height)
+        cols_minus = pygame.Rect(config_x, config_y + control_spacing, button_small, button_small)
+        cols_plus = pygame.Rect(config_x + config_width - button_small, config_y + control_spacing, button_small, button_small)
         
-        # Botões para quantidade de bolos
-        plates_minus = pygame.Rect(plates_slider.left - button_small - 10, plates_slider.centery - button_small // 2, button_small, button_small)
-        plates_plus = pygame.Rect(plates_slider.right + 10, plates_slider.centery - button_small // 2, button_small, button_small)
+        # Controles para quantidade de bolos
+        plates_value_rect = pygame.Rect(config_x + config_width//2 - button_small, config_y + 2 * control_spacing, button_small*2, control_height)
+        plates_minus = pygame.Rect(config_x, config_y + 2 * control_spacing, button_small, button_small)
+        plates_plus = pygame.Rect(config_x + config_width - button_small, config_y + 2 * control_spacing, button_small, button_small)
+        
+        # Mantemos os nomes das variáveis compatíveis com o código existente
+        rows_slider = rows_value_rect
+        cols_slider = cols_value_rect
+        plates_slider = plates_value_rect
         
         file_buttons = {}
         actions = ['load', 'save']
         file_width = int(self.screen_width * 0.12)
         file_spacing = int(self.screen_width * 0.15)
         file_start_x = center_x - file_spacing // 2
-        file_y = slider_y + 3 * button_height + button_spacing
+        # Posicionar os botões de arquivo mais acima
+        file_y = config_y + 2 * button_height + button_spacing
         
         for i, action in enumerate(actions):
             x = file_start_x + i * file_spacing - file_width // 2
             file_buttons[action] = pygame.Rect(x, file_y, file_width, button_height)
         
-        action_y = file_y + button_height + button_spacing
+        # Posicionar o botão de iniciar jogo mais acima
+        action_y = file_y + button_height + int(button_spacing * 0.7)
         
         start_button = pygame.Rect(
             center_x - button_width // 2,
@@ -191,9 +200,10 @@ class MenuView:
             button_height + 5
         )
         
+        # Posicionar o botão de sair logo abaixo do iniciar
         exit_button = pygame.Rect(
             center_x - button_width // 2,
-            action_y + button_height + 15,
+            action_y + button_height + 10,
             button_width, 
             button_height
         )
@@ -225,7 +235,7 @@ class MenuView:
             'level_section': pygame.Rect(0, level_y - 40, self.screen_width, button_height + 60),
             'algorithm_section': pygame.Rect(0, alg_y - 40, self.screen_width, button_height + 60),
             'game_mode_section': pygame.Rect(0, mode_y - 40, self.screen_width, button_height + 60),
-            'board_config_section': pygame.Rect(0, slider_y - 40, self.screen_width, 3 * button_height + 80),
+            'board_config_section': pygame.Rect(self.screen_width - 200, mode_y - 40, 180, 3 * button_height + 60),
             'file_section': pygame.Rect(0, file_y - 40, self.screen_width, button_height + 60),
             'action_section': pygame.Rect(0, action_y - 20, self.screen_width, 2*button_height + 40)
         }
@@ -633,69 +643,72 @@ class MenuView:
         self.screen.blit(exit_text, exit_text_rect)
     
     def _draw_board_config(self):
-        # Desenha a seção de configuração do tabuleiro
-        section_title = self.fonts['large'].render("Configurações do Tabuleiro", True, self.colors['text'])
-        title_rect = section_title.get_rect(centerx=self.screen_width // 2, top=self.layout['board_config_section'].top + 10)
+        # Desenha a seção de configuração do tabuleiro na lateral direita
+        section_title = self.fonts['large'].render("Configurações", True, self.colors['text'])
+        title_rect = section_title.get_rect(centerx=self.screen_width - 110, top=self.layout['board_config_section'].top - 30)
         self.screen.blit(section_title, title_rect)
         
         board_config = self.buttons['board_config']
         
-        # Desenha o controle de linhas
-        rows_label = self.fonts['medium'].render(f"Linhas: {self.board_rows}", True, self.colors['text'])
-        rows_rect = rows_label.get_rect(right=board_config['rows_slider'].left - 20, centery=board_config['rows_slider'].centery)
-        self.screen.blit(rows_label, rows_rect)
+        # Desenha o fundo da área de configuração
+        config_area = pygame.Rect(
+            board_config['rows_minus'].left - 10,
+            title_rect.top - 10,
+            (board_config['rows_plus'].right - board_config['rows_minus'].left) + 20,
+            (board_config['plates_plus'].bottom - title_rect.top) + 20
+        )
+        pygame.draw.rect(self.screen, (40, 15, 60, 150), config_area, border_radius=10)
+        pygame.draw.rect(self.screen, self.colors['selected'], config_area, 2, border_radius=10)
         
-        # Desenha o slider de linhas
-        pygame.draw.rect(self.screen, self.colors['slider_bg'], board_config['rows_slider'])
-        slider_fill_width = int(board_config['rows_slider'].width * (self.board_rows - 2) / 4)  # 2-6 linhas
-        slider_fill = pygame.Rect(board_config['rows_slider'].left, board_config['rows_slider'].top, 
-                                 slider_fill_width, board_config['rows_slider'].height)
-        pygame.draw.rect(self.screen, self.colors['slider_fg'], slider_fill)
-        pygame.draw.rect(self.screen, self.colors['text'], board_config['rows_slider'], 2)
-        
-        # Desenha os botões de ajuste de linhas
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['rows_minus'])
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['rows_plus'])
+        # Estilo comum para os botões
         minus_text = self.fonts['medium'].render("-", True, self.colors['text'])
         plus_text = self.fonts['medium'].render("+", True, self.colors['text'])
+        
+        # Desenha o controle de linhas
+        rows_label = self.fonts['medium'].render("Linhas:", True, self.colors['text'])
+        rows_rect = rows_label.get_rect(centerx=config_area.centerx, top=board_config['rows_minus'].top - 30)
+        self.screen.blit(rows_label, rows_rect)
+        
+        # Desenha o valor numérico das linhas
+        rows_value = self.fonts['large'].render(str(self.board_rows), True, self.colors['selected'])
+        rows_value_rect = rows_value.get_rect(center=board_config['rows_slider'].center)
+        self.screen.blit(rows_value, rows_value_rect)
+        
+        # Desenha os botões de ajuste de linhas
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['rows_minus'], border_radius=5)
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['rows_plus'], border_radius=5)
         self.screen.blit(minus_text, minus_text.get_rect(center=board_config['rows_minus'].center))
         self.screen.blit(plus_text, plus_text.get_rect(center=board_config['rows_plus'].center))
         
         # Desenha o controle de colunas
-        cols_label = self.fonts['medium'].render(f"Colunas: {self.board_cols}", True, self.colors['text'])
-        cols_rect = cols_label.get_rect(right=board_config['cols_slider'].left - 20, centery=board_config['cols_slider'].centery)
+        cols_label = self.fonts['medium'].render("Colunas:", True, self.colors['text'])
+        cols_rect = cols_label.get_rect(centerx=config_area.centerx, top=board_config['cols_minus'].top - 30)
         self.screen.blit(cols_label, cols_rect)
         
-        # Desenha o slider de colunas
-        pygame.draw.rect(self.screen, self.colors['slider_bg'], board_config['cols_slider'])
-        slider_fill_width = int(board_config['cols_slider'].width * (self.board_cols - 2) / 4)  # 2-6 colunas
-        slider_fill = pygame.Rect(board_config['cols_slider'].left, board_config['cols_slider'].top, 
-                                 slider_fill_width, board_config['cols_slider'].height)
-        pygame.draw.rect(self.screen, self.colors['slider_fg'], slider_fill)
-        pygame.draw.rect(self.screen, self.colors['text'], board_config['cols_slider'], 2)
+        # Desenha o valor numérico das colunas
+        cols_value = self.fonts['large'].render(str(self.board_cols), True, self.colors['selected'])
+        cols_value_rect = cols_value.get_rect(center=board_config['cols_slider'].center)
+        self.screen.blit(cols_value, cols_value_rect)
         
         # Desenha os botões de ajuste de colunas
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['cols_minus'])
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['cols_plus'])
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['cols_minus'], border_radius=5)
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['cols_plus'], border_radius=5)
         self.screen.blit(minus_text, minus_text.get_rect(center=board_config['cols_minus'].center))
         self.screen.blit(plus_text, plus_text.get_rect(center=board_config['cols_plus'].center))
         
         # Desenha o controle de quantidade de bolos
-        plates_label = self.fonts['medium'].render(f"Bolos: {self.plate_count}", True, self.colors['text'])
-        plates_rect = plates_label.get_rect(right=board_config['plates_slider'].left - 20, centery=board_config['plates_slider'].centery)
+        plates_label = self.fonts['medium'].render("Bolos:", True, self.colors['text'])
+        plates_rect = plates_label.get_rect(centerx=config_area.centerx, top=board_config['plates_minus'].top - 30)
         self.screen.blit(plates_label, plates_rect)
         
-        # Desenha o slider de quantidade de bolos
-        pygame.draw.rect(self.screen, self.colors['slider_bg'], board_config['plates_slider'])
-        slider_fill_width = int(board_config['plates_slider'].width * (self.plate_count - 3) / 17)  # 3-20 bolos
-        slider_fill = pygame.Rect(board_config['plates_slider'].left, board_config['plates_slider'].top, 
-                                 slider_fill_width, board_config['plates_slider'].height)
-        pygame.draw.rect(self.screen, self.colors['slider_fg'], slider_fill)
-        pygame.draw.rect(self.screen, self.colors['text'], board_config['plates_slider'], 2)
+        # Desenha o valor numérico dos bolos
+        plates_value = self.fonts['large'].render(str(self.plate_count), True, self.colors['selected'])
+        plates_value_rect = plates_value.get_rect(center=board_config['plates_slider'].center)
+        self.screen.blit(plates_value, plates_value_rect)
         
         # Desenha os botões de ajuste de quantidade de bolos
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['plates_minus'])
-        pygame.draw.rect(self.screen, self.colors['button'], board_config['plates_plus'])
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['plates_minus'], border_radius=5)
+        pygame.draw.rect(self.screen, self.colors['button'], board_config['plates_plus'], border_radius=5)
         self.screen.blit(minus_text, minus_text.get_rect(center=board_config['plates_minus'].center))
         self.screen.blit(plus_text, plus_text.get_rect(center=board_config['plates_plus'].center))
     

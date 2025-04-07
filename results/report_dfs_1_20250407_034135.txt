@@ -1,0 +1,22 @@
+==========================================
+      RELATÓRIO DE EXECUÇÃO DO ALGORITMO
+==========================================
+
+Data e Hora: 2025-04-07 03:41:35
+Algoritmo: DFS
+Nível do Jogo: 1
+Tamanho do Tabuleiro: 5x3
+
+RESULTADOS:
+- Sucesso: Sim
+- Comprimento do Caminho: 5 movimentos
+- Estados Gerados: 5
+- Tempo de Execução: 0.034070 segundos
+
+ESTATÍSTICAS DO JOGO:
+- Pontuação Final: 0
+- Pratos Utilizados: 0/5
+- Tabuleiro Final: 0/15 células
+
+==========================================
+Fim do Relatório
