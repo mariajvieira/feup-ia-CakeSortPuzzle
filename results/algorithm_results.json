@@ -1356,5 +1356,16 @@
         "states_generated": 6,
         "execution_time": 0.2533912658691406,
         "timestamp": "2025-04-07 22:09:03"
+    },
+    {
+        "algorithm": "greedy",
+        "heuristic": "combined_custom",
+        "level": 1,
+        "board_size": "2x2",
+        "success": true,
+        "path_length": 6,
+        "states_generated": 6,
+        "execution_time": 0.040924787521362305,
+        "timestamp": "2025-04-07 22:50:57"
     }
 ]

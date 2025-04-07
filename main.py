@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import pygame
 import sys
 from src.controllers.game_controller import GameController

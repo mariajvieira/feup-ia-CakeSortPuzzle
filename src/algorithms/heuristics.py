@@ -1,8 +1,3 @@
-"""
-Módulo de heurísticas - Implementa as funções heurísticas para os algoritmos de busca.
-"""
-
-
 def free_slots_heuristic(node):
     board = node.state.board
     empty_slots = sum(1 for i in range(board.rows) for j in range(board.cols) if board.is_empty(i, j))
@@ -29,13 +24,12 @@ def missing_slices_heuristic(node):
             if slice_type is not None:
                 slice_counts[slice_type] = slice_counts.get(slice_type, 0) + 1
     
-    # Calcula quantas fatias estão faltando para completar bolos
     missing_slices = 0
     for slice_type, count in slice_counts.items():
-        complete_cakes = count // 8  # Cada bolo tem 8 fatias
+        complete_cakes = count // 8 
         remaining = count % 8
         if remaining > 0:
-            missing_slices += (8 - remaining)  # Fatias necessárias para completar
+            missing_slices += (8 - remaining) 
     
     return missing_slices
 
@@ -99,9 +93,9 @@ def estimated_moves_heuristic(node):
     
     return remaining_plates
 
-
+# mais rapida -> lenta: h3, h4, h1, h2
 def combined_custom_heuristic(node):
-    w1, w2, w3, w4 = 1.0, 0.0, 0.0, 0.0
+    w1, w2, w3, w4 = 2.0, 1.0, 5.0, 4.0
     
     h1 = free_slots_heuristic(node)
     h2 = missing_slices_heuristic(node)

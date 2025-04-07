@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-Classe AvailablePlates - Responsável por gerenciar os pratos disponíveis para o jogador.
-"""
-
 import random
 import copy
 
@@ -14,42 +7,27 @@ class AvailablePlates:
     def __init__(self, level=1, plate_count=None):
         self.max_plates = 3 
         
-        # Define o limite total de pratos com base no nível ou no parâmetro fornecido
         if plate_count is not None:
             self.total_plate_limit = plate_count
         elif level == 1:
-            self.total_plate_limit = 5  # Nível 1: 5 pratos por padrão
+            self.total_plate_limit = 5 
         else:
-            self.total_plate_limit = 18  # Outros níveis: 18 pratos por padrão
+            self.total_plate_limit = 18 
             
-        self.plates_used = 0  # Contador de pratos já utilizados
+        self.plates_used = 0  
         
-        # Define os tipos de fatias disponíveis com base no nível
         self.slice_types = self._get_slice_types(level)
         
-        # Inicializa os pratos disponíveis visíveis e a fila de pratos
         self.visible_plates = []
         self.plates_queue = []
         
-        # Gera todos os pratos para o jogo
         self._generate_all_plates(level)
         
-        # Mostra os primeiros 3 pratos
         self._refill_visible_plates()
     
     def _get_slice_types(self, level):
-        """Retorna os tipos de fatias disponíveis com base no nível.
-        
-        Args:
-            level (int): Nível do jogo.
-            
-        Returns:
-            list: Lista de tipos de fatias disponíveis.
-        """
-        # Tipos básicos de fatias (cores/sabores diferentes)
         basic_types = [1, 2, 3, 4, 5]
         
-        # Adiciona mais tipos conforme o nível aumenta
         if level >= 3:
             basic_types.extend([6, 7])
         if level >= 5:
@@ -58,126 +36,60 @@ class AvailablePlates:
         return basic_types
     
     def _generate_all_plates(self, level):
-        """Gera todos os pratos para o jogo.
-        
-        Args:
-            level (int): Nível do jogo.
-        """
-        # Limpa a fila de pratos
         self.plates_queue = []
         
-        # Gera todos os pratos de uma vez (18 pratos)
         for _ in range(self.total_plate_limit):
             plate = self._generate_single_plate(level)
             self.plates_queue.append(plate)
     
     def _generate_single_plate(self, level):
-        """Gera um único prato com fatias aleatórias.
-        
-        Args:
-            level (int): Nível do jogo.
-            
-        Returns:
-            list: Um prato com fatias aleatórias.
-        """
-        # Determina o número de fatias no prato (entre 1 e 5, aumentando com o nível)
         num_slices = random.randint(1, min(5, level + 2))
         
-        # Inicializa o prato com 8 espaços vazios (None)
         plate = [None] * 8
         
-        # Preenche o prato com fatias aleatórias
         for _ in range(num_slices):
-            # Escolhe um tipo de fatia aleatório
             slice_type = random.choice(self.slice_types)
             
-            # Encontra um espaço vazio no prato
             empty_indices = [i for i, slice_val in enumerate(plate) if slice_val is None]
-            if empty_indices:  # Se houver espaços vazios
+            if empty_indices: 
                 index = random.choice(empty_indices)
                 plate[index] = slice_type
         
         return plate
     
     def _refill_visible_plates(self):
-        """Preenche os pratos visíveis com pratos da fila, se disponíveis."""
-        # Preenche os pratos visíveis até o máximo ou até acabar a fila
         while len(self.visible_plates) < self.max_plates and self.plates_queue:
             self.visible_plates.append(self.plates_queue.pop(0))
     
     def get_plate(self, index):
-        """Retorna um prato específico.
-        
-        Args:
-            index (int): Índice do prato na lista de disponíveis visíveis.
-            
-        Returns:
-            list: O prato solicitado ou None se o índice for inválido.
-        """
         if 0 <= index < len(self.visible_plates):
             return copy.deepcopy(self.visible_plates[index])
         return None
     
     def remove_plate(self, index):
-        """Remove um prato da lista de disponíveis visíveis e atualiza os pratos disponíveis.
-        
-        Args:
-            index (int): Índice do prato a ser removido.
-            
-        Returns:
-            bool: True se o prato foi removido com sucesso, False caso contrário.
-        """
         if 0 <= index < len(self.visible_plates):
-            # Remove o prato
             self.visible_plates.pop(index)
             
-            # Incrementa o contador de pratos utilizados
             self.plates_used += 1
             
-            # Reabastece os pratos visíveis se necessário e se ainda houver na fila
             self._refill_visible_plates()
             
             return True
         return False
     
     def has_plates(self):
-        """Verifica se ainda há pratos disponíveis para uso.
-        
-        Returns:
-            bool: True se há pratos disponíveis, False caso contrário.
-        """
         return len(self.visible_plates) > 0 or len(self.plates_queue) > 0
     
     def is_exhausted(self):
-        """Verifica se todos os pratos disponíveis já foram utilizados.
-        
-        Returns:
-            bool: True se todos os pratos já foram utilizados, False caso contrário.
-        """
         return self.plates_used >= self.total_plate_limit
     
     def get_remaining_plates(self):
-        """Retorna o número de pratos restantes para uso.
-        
-        Returns:
-            int: Número de pratos restantes.
-        """
         return self.total_plate_limit - self.plates_used
     
     def get_visible_plate_count(self):
-        """Retorna o número de pratos visíveis.
-        
-        Returns:
-            int: Número de pratos visíveis.
-        """
         return len(self.visible_plates)
     
     def get_representation(self):
-        """Retorna uma representação dos pratos disponíveis.
-        
-        Returns:
-            dict: Dicionário com informações sobre os pratos disponíveis.
-        """
         return {
             'visible_plates': copy.deepcopy(self.visible_plates),
             'plates_used': self.plates_used,
@@ -186,12 +98,7 @@ class AvailablePlates:
         }
     
     def clone(self):
-        """Cria uma cópia profunda dos pratos disponíveis.
-        
-        Returns:
-            AvailablePlates: Uma nova instância de AvailablePlates com os mesmos valores.
-        """
-        new_avl_plates = AvailablePlates(1)  # Nível 1 temporário
+        new_avl_plates = AvailablePlates(1)  
         new_avl_plates.visible_plates = copy.deepcopy(self.visible_plates)
         new_avl_plates.plates_queue = copy.deepcopy(self.plates_queue)
         new_avl_plates.max_plates = self.max_plates

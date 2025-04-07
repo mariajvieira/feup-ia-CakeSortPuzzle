@@ -1,4 +1,3 @@
-
 import pygame
 import os
 import math
@@ -102,7 +101,6 @@ class GameView:
                             (x, self.board_rect.top),
                             (x, self.board_rect.bottom), 2)
         
-        # Desenha os pratos no tabuleiro
         for i in range(self.game_state.board.rows):
             for j in range(self.game_state.board.cols):
                 if not self.game_state.board.is_empty(i, j):
@@ -122,14 +120,12 @@ class GameView:
                     slices_by_type[slice_type] = 0
                 slices_by_type[slice_type] += 1
         
-        # Cria um novo prato com as fatias agrupadas
-        reorganized_plate = [None] * 8  # Um prato tem 8 posições
+        reorganized_plate = [None] * 8 
         current_position = 0
         
-        # Adiciona cada tipo de fatia em posições consecutivas
         for slice_type, count in slices_by_type.items():
             for i in range(count):
-                if current_position < 8:  # Garante que não exceda o tamanho do prato
+                if current_position < 8:  
                     reorganized_plate[current_position] = slice_type
                     current_position += 1
         
@@ -148,7 +144,6 @@ class GameView:
             center_y = y + self.cell_size // 2
             radius = self.cell_size // 2 - 4
             
-            # Reorganiza as fatias para que fatias do mesmo tipo fiquem em posições consecutivas
             reorganized_plate = self._reorganize_plate(plate)
             
             for i, slice_type in enumerate(reorganized_plate):
@@ -193,7 +188,6 @@ class GameView:
                     highlight_rect = rect.inflate(10, 10)
                     pygame.draw.rect(self.screen, self.colors['highlight'], highlight_rect)
                 
-                # Desenha o prato
                 self._render_plate(rect.x, rect.y, plate)
                 
                 text = self.fonts['small'].render(str(i + 1), True, self.colors['text'])
@@ -204,15 +198,11 @@ class GameView:
         title = self.fonts['title'].render("Cake Sorting Puzzle", True, self.colors['text'])
         title_rect = title.get_rect(centerx=self.screen.get_width() // 2, top=10)
         self.screen.blit(title, title_rect)
-        
-        level_text = self.fonts['medium'].render(f"Nível: {self.game_state.level}", True, self.colors['text'])
-        level_rect = level_text.get_rect(left=10, top=10)
-        self.screen.blit(level_text, level_rect)
-        
+                
         score_text = self.fonts['medium'].render(
             f"Bolos concluídos: {self.game_state.score}",
             True, self.colors['text'])
-        score_rect = score_text.get_rect(left=10, top=level_rect.bottom + 5)
+        score_rect = score_text.get_rect(left=10, top=10)
         self.screen.blit(score_text, score_rect)
         
         moves_text = self.fonts['medium'].render(f"Movimentos: {self.game_state.moves}", True, self.colors['text'])
@@ -225,17 +215,23 @@ class GameView:
         plates_rect = plates_text.get_rect(left=10, top=moves_rect.bottom + 5)
         self.screen.blit(plates_text, plates_rect)
         
-        if hasattr(self, 'game_controller') and self.game_controller:
+        if (
+            hasattr(self, 'game_controller')
+            and self.game_controller
+            and getattr(self.game_controller, 'game_mode', 'human') == 'ai'
+        ):
             algorithm_text = self.fonts['medium'].render(
                 f"Algoritmo: {self.game_controller.algorithm.upper()}", 
-                True, self.colors['text'])
+                True, self.colors['text']
+            )
             algorithm_rect = algorithm_text.get_rect(right=self.screen.get_width() - 10, top=10)
             self.screen.blit(algorithm_text, algorithm_rect)
-            
+
             if self.game_controller.solution_time > 0:
                 time_text = self.fonts['medium'].render(
                     f"Tempo de solução: {self.game_controller.solution_time:.3f}s", 
-                    True, self.colors['text'])
+                    True, self.colors['text']
+                )
                 time_rect = time_text.get_rect(right=self.screen.get_width() - 10, top=algorithm_rect.bottom + 5)
                 self.screen.blit(time_text, time_rect)
         
