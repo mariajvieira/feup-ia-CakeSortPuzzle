@@ -1,34 +1,33 @@
 # Cake Sorting Puzzle
 
-Um jogo de puzzle profissional desenvolvido com Pygame, onde o objetivo é organizar fatias de bolo para formar bolos completos.
+A professional puzzle game developed with Pygame, where the goal is to organize cake slices to form complete cakes.
 
-## Descrição
+## Description
 
-O Cake Sorting Puzzle é um jogo de quebra-cabeça onde o jogador deve organizar fatias de bolo em pratos. Cada prato pode conter até 8 fatias, e quando um prato contém 8 fatias do mesmo tipo, forma-se um bolo completo que desaparece do tabuleiro.
+Cake Sorting Puzzle is a puzzle game where the player must organize cake slices on plates. Each plate can hold up to 8 slices, and when a plate contains 8 slices of the same type, a full cake is formed and disappears from the board.
 
-## Características
+## Features
 
-- Interface gráfica desenvolvida com Pygame
-- Arquitetura MVC (Model-View-Controller)
-- Múltiplos níveis com diferentes tamanhos de tabuleiro
-- Algoritmos de busca implementados (BFS, DFS, IDS, UCS)
-- Sistema de pontuação
-- Verificação de pratos adjacentes para maximizar fatias do mesmo tipo
+- Graphical interface developed with Pygame  
+- MVC (Model-View-Controller) architecture  
+- Multiple levels with different board sizes  
+- Implemented search algorithms (BFS, DFS, IDS, UCS)  
+- Scoring system  
+- Adjacent plate checking to maximize same-type slices  
 
-## Como Jogar
+## How to Play
 
-1. Execute o arquivo `main.py`
-2. Selecione um nível e um algoritmo de busca no menu
-3. Coloque os pratos no tabuleiro estrategicamente para formar bolos completos
+1. Run the `main.py` file  
+2. Select a level and a search algorithm from the menu  
+3. Place the plates strategically on the board to form complete cakes  
 
-## Requisitos
+## Requirements
 
-- Python 3.x
-- Pygame
+- Python 3.x  
+- Pygame  
 
-## Instalação
+## Installation
 
 ```bash
 pip install pygame
 python main.py
-```
